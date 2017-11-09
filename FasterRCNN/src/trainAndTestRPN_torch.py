@@ -20,7 +20,7 @@ from p2_model import *
 # define global variables
 train_display_interval = 5
 batch_size = 100
-step = 100
+step = 50
 max_iteration = 1000
 
 
@@ -115,8 +115,8 @@ def test(dir_model, test_imgs, test_masks):
   the_model.eval()
 
   # test
-  im_batch = torch.from_numpy(test_imgs).type(torch.FloatTensor)
-  mask_batch = torch.from_numpy(test_masks).type(torch.FloatTensor)
+  im_batch = torch.from_numpy(test_imgs[:3000, :, :, :]).type(torch.FloatTensor)
+  mask_batch = torch.from_numpy(test_masks[:3000, :, :, :]).type(torch.FloatTensor)
 
   # get valid index (pos and neg)
   ind_pos, ind_neg = torch.eq(mask_batch, 1), torch.eq(mask_batch, 0)
@@ -145,11 +145,7 @@ def test(dir_model, test_imgs, test_masks):
 
   correct = pos_match.sum() + neg_match.sum()
 
-
-  correct /= validnum
-
-  print('\nTest set: Average loss: {:.4f}, Accuracy: {:.4f}% \n'.format(test_loss, 100. * correct))
-
+  print('\nTest set: Average loss: {:.4f}, Accuracy: {:.4f}% \n'.format(test_loss.data[0], 100. * correct / validnum))
   return test_loss, correct
 
 

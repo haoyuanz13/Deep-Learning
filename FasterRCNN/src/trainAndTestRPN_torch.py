@@ -18,7 +18,7 @@ from p2_model import *
 
 
 # define global variables
-train_display_interval = 10
+train_display_interval = 5
 batch_size = 100
 step = 100
 max_iteration = 1000
@@ -44,35 +44,38 @@ def train(model, train_imgs, train_masks, epoch, learning_rate):
     mask_batch = train_masks[batch_idx * batch_size : (batch_idx + 1) * batch_size, :, :, :]
 
     im_batch = torch.from_numpy(im_batch).type(torch.FloatTensor)
-    mask_batch = torch.from_numpy(mask_batch).type(torch.LongTensor)
+    mask_batch = torch.from_numpy(mask_batch).type(torch.FloatTensor)
 
     # get valid index (pos and neg)
     ind_pos, ind_neg = torch.eq(mask_batch, 1), torch.eq(mask_batch, 0)
+    valid_mask = torch.ne(mask_batch, 2).type(torch.FloatTensor)
     validnum = float(ind_pos.sum() + ind_neg.sum())
 
     # convert to variable in cuda form
     im_batch, mask_batch = Variable(im_batch).cuda(1), Variable(mask_batch).cuda(1)
-
-    # build one more channel for binary classification
-    feaMap_2c = torch.FloatTensor(batch_size, 2, 6, 6).zero_()
+    valid_mask = Variable(valid_mask).cuda(1)
 
     # training process
     optimizer.zero_grad()
     feaMap = model(im_batch)
 
-    feaMap_2c[:, 0, :, :] = 1 - feaMap.data  # represents the neg class
-    feaMap_2c[:, 1, :, :] = feaMap.data  # represents the pos class
+    # compute loss
+    loss_feaMap, loss_mask = valid_mask * feaMap, valid_mask * mask_batch
+    loss = loss_feaMap * loss_mask + (1 - loss_feaMap) * (1 - loss_mask)
+    loss = -loss.log().sum() / validnum
 
-    feaMap_2c = Variable(feaMap_2c, requires_grad=True).cuda(1).log()
-
-    # nll loss is suitable for n classification problem
-    loss = F.nll_loss(feaMap_2c, mask_batch[:, 0, :, :], ignore_index=2)
     list_loss[batch_idx, 0] = loss.data[0]
     loss.backward()
 
-    # compute the accuracy
-    pred = feaMap_2c.data.max(1, keepdim = True)[1] # get the index of the max log-probability
-    correct = pred.eq(mask_batch.data.view_as(pred)).sum()
+    # count accuracy
+    threshold_pos, threshold_neg = 0.75, 0.25
+    predPos = torch.ge(feaMap, threshold_pos).type(torch.FloatTensor).cuda(1)
+    predNeg = torch.ge(feaMap, threshold_neg).type(torch.FloatTensor).cuda(1)
+
+    pos_match = predPos.eq(mask_batch).data * ind_pos.cuda(1)
+    neg_match = predNeg.eq(mask_batch).data * ind_neg.cuda(1)
+
+    correct = pos_match.sum() + neg_match.sum()
     acc = correct / validnum
     list_acc[batch_idx, 0] = acc
 
@@ -94,16 +97,16 @@ def train(model, train_imgs, train_masks, epoch, learning_rate):
       print('Train Epoch:{} [{}/{}]  Accuracy: {:.0f}%, Loss: {:.6f}'.format(
         epoch, batch_idx * batch_size , step * batch_size, 100. * acc, loss.data[0]))
 
-  print('---------- The {}th train epoch has completed -------------'.format(epoch))
+  # end all steps
   return list_loss, list_acc, grad_conv_front, grad_conv_back
-  
+
 
 '''
   test for the trained model
 '''
-def test(dir_model, testData):
+def test(dir_model, test_imgs, test_masks):
   print "testing...................................."
-  the_model = Net3()
+  the_model = RPN()
 
   model_param = torch.load(dir_model)
   the_model.load_state_dict(model_param)
@@ -111,25 +114,43 @@ def test(dir_model, testData):
   the_model.cuda(1)
   the_model.eval()
 
-  test_loss, correct = 0, 0
+  # test
+  im_batch = torch.from_numpy(test_imgs).type(torch.FloatTensor)
+  mask_batch = torch.from_numpy(test_masks).type(torch.FloatTensor)
 
-  for data, label_gt in testData:
-    # data, label_gt = Variable(data), Variable(label_gt)
-    data, label_gt = Variable(data).cuda(1), Variable(label_gt).cuda(1)
-    label_pred = the_model(data)
-    
-    test_loss += F.nll_loss(label_pred, label_gt, size_average = False).data[0] # sum up batch loss
-    
-    pred = label_pred.data.max(1, keepdim = True)[1] # get the index of the max log-probability
-    # correct += pred.eq(label_gt.data.view_as(pred)).cpu().sum()
-    correct += pred.eq(label_gt.data.view_as(pred)).cuda(1).sum()
-  
-  total = float(len(testData.dataset))
-  test_loss /= total
+  # get valid index (pos and neg)
+  ind_pos, ind_neg = torch.eq(mask_batch, 1), torch.eq(mask_batch, 0)
+  valid_mask = torch.ne(mask_batch, 2).type(torch.FloatTensor)
+  validnum = float(ind_pos.sum() + ind_neg.sum())
 
-  print('\nTest set: Average loss: {:.4f}, Accuracy: {:.4f}% \n'.format(test_loss, 100. * correct / total))
+  # convert to variable in cuda form
+  im_batch, mask_batch = Variable(im_batch).cuda(1), Variable(mask_batch).cuda(1)
+  valid_mask = Variable(valid_mask).cuda(1)
 
-  return test_loss, correct / total
+  # feed forward
+  feaMap = the_model(im_batch)
+
+  # compute loss
+  loss_feaMap, loss_mask = valid_mask * feaMap, valid_mask * mask_batch
+  loss = loss_feaMap * loss_mask + (1 - loss_feaMap) * (1 - loss_mask)
+  test_loss = -loss.log().sum() / validnum
+
+  # count accuracy
+  threshold_pos, threshold_neg = 0.75, 0.25
+  predPos = torch.ge(feaMap, threshold_pos).type(torch.FloatTensor).cuda(1)
+  predNeg = torch.ge(feaMap, threshold_neg).type(torch.FloatTensor).cuda(1)
+
+  pos_match = predPos.eq(mask_batch).data * ind_pos.cuda(1)
+  neg_match = predNeg.eq(mask_batch).data * ind_neg.cuda(1)
+
+  correct = pos_match.sum() + neg_match.sum()
+
+
+  correct /= validnum
+
+  print('\nTest set: Average loss: {:.4f}, Accuracy: {:.4f}% \n'.format(test_loss, 100. * correct))
+
+  return test_loss, correct
 
 
 '''
@@ -164,6 +185,7 @@ def main(train_imgs, train_masks, test_imgs, test_masks):
     inds = np.random.permutation(inds)
     train_imgs, train_masks = train_imgs[inds, :, :, :], train_masks[inds, :, :, :]
     losses, accs, grad_w_f, grad_w_b = train(model, train_imgs, train_masks, epoch, decayed_learning_rate)
+    print('---------- The {}th train epoch has completed -------------'.format(epoch))
 
     loss_avg, acc_avg = np.mean(losses), np.mean(accs)
     grad_w_f_avg, grad_w_b_avg = np.mean(grad_w_f), np.mean(grad_w_b)
@@ -185,18 +207,19 @@ def main(train_imgs, train_masks, test_imgs, test_masks):
       break
     
     # save model and result every 100 epoch
-    if epoch % 100 == 0:
+    if epoch % 1 == 0:
       # save model
       torch.save(model.state_dict(), model_path)
 
       # test trained model 
-      test_loss, test_acc = test(model_path, test_data)  
-      # test_loss, test_acc = testnow(model, test_data)    
+      test_loss, test_acc = test(model_path, test_imgs, test_masks)
+
+      # store results     
       np.save(file_name_train, [train_loss[:epoch, :], train_acc[:epoch, :]])
       np.save(file_name_train_grad, [train_gradw_f[:epoch, :], train_gradw_b[:epoch, :]])
       np.save(file_name_test, [test_loss, test_acc])
 
-
+    # update index
     epoch += 1
 
 
@@ -217,5 +240,8 @@ if __name__ == '__main__':
 
   # the main code
   main(train_imgs, train_masks, test_imgs, test_masks)
+
+
+
 
 

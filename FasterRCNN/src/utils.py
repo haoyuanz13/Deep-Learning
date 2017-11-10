@@ -15,6 +15,28 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 
+'''
+  Convert reg raw data into proper array form
+'''
+def convertReg(rawData):
+  total = len(rawData)
+  data = np.zeros([len(rawData), 3, 6, 6])
+
+  ind = np.arange(0, total, 1)
+  for i in ind:
+    print 'Processing the {}th ground truth......'.format(i)
+    cur_data = rawData[i, :]
+
+    data[i, 0, :, :] = np.full((6, 6), cur_data[0])
+    data[i, 1, :, :] = np.full((6, 6), cur_data[1])
+    data[i, 2, :, :] = np.full((6, 6), cur_data[2])
+
+  np.save('regdata.npy', data)
+    
+
+
+  # pdb.set_trace()
+
 
 '''
   plot curver between iteration times and loss or accuracy

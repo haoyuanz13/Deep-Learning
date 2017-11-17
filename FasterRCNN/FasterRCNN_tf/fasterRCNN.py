@@ -8,13 +8,21 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import pdb
 from PIL import Image
+import time
 
 from layers import *
 from helper import *
 from RPN_section import *
 from spatial_transformer import *
 
+'''
+  Global constant variables
+'''
+batch_size, step, iteration = 100, 100, 1000
+display_interval, test_interval = 10, 50
+weight_decay_ratio = 0.05
 classes_label = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+
 
 '''
   load data as dictionary
@@ -71,26 +79,32 @@ def fasterRCNN(data, mask_batch, reg_batch, label, bs, reuse):
     with tf.variable_scope('BaseNet', reuse=reuse) as base:
       # 1st convolution layer
       with tf.variable_scope('conv1', reuse=reuse):
-        data = ConvBlock(data, 3, 32, 5, 1, is_train=True, reuse=reuse)
+        # data = ConvBlock(data, 3, 32, 5, 1, is_train=True, reuse=reuse, wd=weight_decay_ratio)
+        # data = MobileBloack(data, 3, 32, 5, 5, is_train=True, reuse=reuse, wd=weight_decay_ratio)
+        data = ResBlock(data, 3, 32, 3, 3, 1, is_train=True, reuse=reuse, wd=weight_decay_ratio)
         data_conv1 = maxPool(data)
 
       # the 2nd convolution layer
       with tf.variable_scope('conv2', reuse=reuse):
-        data_conv1 = ConvBlock(data_conv1, 32, 64, 5, 1, is_train=True, reuse=reuse)
+        # data_conv1 = ConvBlock(data_conv1, 32, 64, 5, 1, is_train=True, reuse=reuse, wd=weight_decay_ratio)
+        # data_conv1 = MobileBloack(data_conv1, 32, 64, 5, 5, is_train=True, reuse=True, wd=weight_decay_ratio)
+        data_conv1 = ResBlock(data_conv1, 32, 64, 3, 3, 1, is_train=True, reuse=reuse, wd=weight_decay_ratio)
         data_conv2 = maxPool(data_conv1)
 
       # the 3rd convolution layer
       with tf.variable_scope('conv3', reuse=reuse):
-        data_conv2 = ConvBlock(data_conv2, 64, 128, 5, 1, is_train=True, reuse=reuse)
+        # data_conv2 = ConvBlock(data_conv2, 64, 128, 5, 1, is_train=True, reuse=reuse, wd=weight_decay_ratio)
+        # data_conv2 = MobileBloack(data_conv2, 64, 128, 5, 5, is_train=True, reuse=reuse, wd=weight_decay_ratio)
+        data_conv2 = ResBlock(data_conv2, 64, 128, 3, 3, 1, is_train=True, reuse=reuse, wd=weight_decay_ratio)
         data_conv3 = maxPool(data_conv2)
 
       # the 3rd convolution layer
       with tf.variable_scope('conv4', reuse=reuse):
-        data_conv4 = ConvBlock(data_conv3, 128, 256, 3, 1, is_train=True, reuse=reuse)
+        data_conv4 = ConvBlock(data_conv3, 128, 256, 3, 1, is_train=True, reuse=reuse, wd=weight_decay_ratio)
 
       # intermediate layer
       with tf.variable_scope('intermediate', reuse=reuse):
-        inter_map = ConvBlock(data_conv4, 256, 256, 3, 1, is_train=True, reuse=reuse)
+        inter_map = ConvBlock(data_conv4, 256, 256, 3, 1, is_train=True, reuse=reuse, wd=weight_decay_ratio)
 
 
     # Cls branch with variable space: cls_branch
@@ -98,6 +112,7 @@ def fasterRCNN(data, mask_batch, reg_batch, label, bs, reuse):
       # get cls feature map
       with tf.variable_scope('clsMap', reuse=reuse):
         Weight = tf.Variable(tf.truncated_normal([1, 1, 256, 1], stddev=0.1), name='W_cls')
+        Weight = varWeightDecay(Weight, weight_decay_ratio)  # weight decay
         bias = tf.Variable(tf.constant(0.1, shape=[1]), name='b_cls')
         cls_map = conv2d(inter_map, Weight) + bias
         cls_map = tf.reshape(cls_map, [-1, 6, 6])
@@ -125,6 +140,7 @@ def fasterRCNN(data, mask_batch, reg_batch, label, bs, reuse):
       # get reg feature map
       with tf.variable_scope('regMap', reuse=reuse):
         Weight = tf.Variable(tf.truncated_normal([1, 1, 256, 3], stddev=0.1), name='W_reg')
+        Weight = varWeightDecay(Weight, weight_decay_ratio)  # weight decay
         bias = tf.Variable(tf.constant([24., 24., 32.]), name='b_reg')
         reg_map = conv2d(inter_map, Weight) + bias
 
@@ -180,7 +196,7 @@ def fasterRCNN(data, mask_batch, reg_batch, label, bs, reuse):
     # fully connected layer: convert from 4x4x256 to 256
     with tf.variable_scope('FC1', reuse=reuse) as fc1:
       fc_map = tf.reshape(spatial_map, [bs, 4*4*256])
-      fc_map_flat = FcBlock(fc_map, 4*4*256, 256, is_train=True, reuse=reuse)
+      fc_map_flat = FcBlock(fc_map, 4*4*256, 256, is_train=True, reuse=reuse, wd=weight_decay_ratio)
 
     # the addtional convolution layer
     # with tf.variable_scope('conv_add', reuse=reuse) as conv_add:
@@ -191,9 +207,10 @@ def fasterRCNN(data, mask_batch, reg_batch, label, bs, reuse):
     #   fc_map = tf.nn.relu(fc_map)
 
     # fully connected layer: convert from 256 to 10
-    with tf.variable_scope('FC', reuse=reuse) as fc:
+    with tf.variable_scope('FC2', reuse=reuse) as fc2:
       # fc_map_flat = tf.reshape(fc_map, [bs, 256])
-      W = tf.get_variable('weights', [256, 10], initializer=tf.contrib.layers.variance_scaling_initializer())
+      W = tf.get_variable('weights', [256, 10], initializer=tf.truncated_normal_initializer(stddev=0.1))
+      W = varWeightDecay(W, weight_decay_ratio)  # weight decay
       pred = tf.matmul(fc_map_flat, W)
 
     # softmax layer
@@ -203,7 +220,7 @@ def fasterRCNN(data, mask_batch, reg_batch, label, bs, reuse):
       sf_acc = tf.reduce_mean(tf.to_float(tf.equal(tf.argmax(pred, axis=1), label)))
 
   # joint loss    
-  comb_loss = 5 * smooth_L1_loss_reg + cross_entropy_classify + sf_loss
+  comb_loss = 10 * smooth_L1_loss_reg + cross_entropy_classify + sf_loss
   # obtain all variables of faster rcnn
   var_fastrcnn = tf.contrib.framework.get_variables(fasterrcnn)
 
@@ -214,14 +231,12 @@ def fasterRCNN(data, mask_batch, reg_batch, label, bs, reuse):
   The train and test model
 '''
 def trainAndTest(dict_train, dict_test):
-  epoch, batch_size, step, iteration = 0, 100, 100, 1000
-  display_interval, test_interval = 10, 50
-
   image = tf.placeholder(tf.float32, [batch_size, 48, 48, 3])  # x_image represents the input image
   mask_gt = tf.placeholder(tf.float32, [batch_size, 6, 6])  # mask for classification
   reg_gt = tf.placeholder(tf.float32, [batch_size, 6, 6, 3])  # the ground truth for proposal regression
   label_gt = tf.placeholder(tf.int64, [batch_size])  # the ground truth label
 
+  # faster rcnn model
   comb_loss, sf_loss, sf_acc, cls_loss, cls_acc, reg_loss, reg_acc, var_frcnn = \
                                       fasterRCNN(image, mask_gt, reg_gt, label_gt, batch_size, None)
 
@@ -240,8 +255,10 @@ def trainAndTest(dict_train, dict_test):
   sess = tf.InteractiveSession()
   sess.run(tf.global_variables_initializer())
 
+  epoch, time_count = 0, 0
   while (epoch < iteration):
     print '\n********************************* The {}th epoch training is processing *********************************'.format(epoch + 1)
+    start_time = time.time()
     # data shuffle 
     arr = np.arange(dict_train['img'].shape[0])
     np.random.shuffle(arr)
@@ -290,6 +307,8 @@ def trainAndTest(dict_train, dict_test):
       train_step.run(feed_dict={image:data_batch, mask_gt:mask_batch, reg_gt:reg_mask_batch, label_gt:label_batch})
       step_cur += 1
 
+    elapsed_time = time.time() - start_time
+    time_count += elapsed_time
     # end of current epoch iteration 
     
     rcnn_loss_sum /= step
@@ -300,7 +319,7 @@ def trainAndTest(dict_train, dict_test):
     cls_acc_sum /= step
     reg_acc_sum /= step
     # print the result for each epoch
-    print '\n********************************* The {}th epoch training has completed *********************************'.format(epoch + 1)
+    print '\n********************************* The {}th epoch training has completed using {} s *********************************'.format(epoch + 1, elapsed_time)
     print 'The Avg Obj Loss is {:.8f}, Avg Acc is {:.2f}% || The Avg Cls Loss is {:.8f}, Avg Acc is {:.2f}% || The Avg Reg Loss is {:.8f}, Avg Acc is {:.2f}%. \n'.format(
       rcnn_loss_sum, 100 * rcnn_acc_sum, cls_loss_sum, 100 * cls_acc_sum, reg_loss_sum, 100 * reg_acc_sum)
 
@@ -382,7 +401,7 @@ def trainAndTest(dict_train, dict_test):
     np.save('res/FasterRCNN_train_reg_loss.npy', list_loss_reg[:epoch, :])
     np.save('res/FasterRCNN_train_reg_acc.npy', list_acc_reg[:epoch, :])
 
-  return
+  return time_count
 
 
 # main code
@@ -391,12 +410,13 @@ def main(showRes):
     # load data
     dict_train = dataProcess(readTest=False)
     dict_test = dataProcess(readTest=True)
-    trainAndTest(dict_train, dict_test)
+    timeCost = trainAndTest(dict_train, dict_test)
+    print '\n=========== The training process has completed! Total [{} epochs] using [time {} s] ============'.format(iteration, timeCost)
 
   else:
     processPlot()
 
 
 if __name__ == "__main__":
-  op = True
+  op = False
   main(op)

@@ -18,17 +18,20 @@ def maxPool(h):
 '''
   The convolutional block: Conv + BN + Relu
 '''
-def ConvBlock(x, in_channels, out_channels, kernel_size, stride, is_train, reuse):  
-  vs = tf.get_variable_scope()
-  W = tf.get_variable('weights', [kernel_size, kernel_size, in_channels, out_channels],
-        initializer = tf.contrib.layers.variance_scaling_initializer())
+def ConvBlock(x, in_channels, out_channels, kernel_size, stride, is_train, reuse, wd=0.0):  
+  # vs = tf.get_variable_scope()
+  W = tf.get_variable('weights', [kernel_size, kernel_size, in_channels, out_channels], 
+      initializer = tf.truncated_normal_initializer(stddev=0.1))
+  # weight decay if wd is larger than 0
+  W = varWeightDecay(W, wd) if wd > 0 else W
+
   b = tf.get_variable('biases', [1, 1, 1, out_channels],
         initializer = tf.constant_initializer(0.0))
 
   x = tf.nn.conv2d(x, W, strides=[1, stride, stride, 1], padding='SAME') + b
 
   x = tf.contrib.layers.batch_norm(x, is_training=is_train, 
-        scale=True, fused=True, scope=vs, updates_collections=None)
+        scale=True, fused=True, updates_collections=None)
 
   x = tf.nn.relu(x)
   return x
@@ -37,51 +40,104 @@ def ConvBlock(x, in_channels, out_channels, kernel_size, stride, is_train, reuse
 '''
   The fully connected block: FC + BN + Relu
 '''
-def FcBlock(x, in_channels, out_channels, is_train, reuse):
-  vs = tf.get_variable_scope()
-
+def FcBlock(x, in_channels, out_channels, is_train, reuse, wd=0.0):
+  # vs = tf.get_variable_scope()
   W = tf.get_variable('weights', [in_channels, out_channels],
-        initializer = tf.contrib.layers.variance_scaling_initializer())
+        initializer = tf.truncated_normal_initializer(stddev=0.1))
+  W = varWeightDecay(W, wd) if wd > 0 else W
+    
   b = tf.get_variable('biases', [1, out_channels],
         initializer = tf.constant_initializer(0.0))
 
   x = tf.matmul(x, W)
 
   x = tf.contrib.layers.batch_norm(x, is_training=is_train, 
-        scale=True, fused=True, scope=vs, updates_collections=None)
+        scale=True, fused=True, updates_collections=None)
   
   x = tf.nn.relu(x)
   return x
 
+'''
+  Mobile net: contains depthwise and pointwise
+'''
+def MobileBloack(x, in_channels, out_channels, depth_kernel_size_h, depth_kernel_size_w, is_train, reuse, wd=0.0):
+  '''
+    depthwise conv
+  '''
+  W_depth = tf.get_variable('depth_weights', [depth_kernel_size_h, depth_kernel_size_w, in_channels, 1],
+        initializer = tf.truncated_normal_initializer(stddev=0.1))   
+  # weight decay if wd is larger than 0
+  W_depth = varWeightDecay(W_depth, wd) if wd > 0 else W_depth
+  b_depth = tf.get_variable('depth_biases', [1, 1, 1, in_channels], initializer = tf.constant_initializer(0.0))
 
-# '''
-#   Batch normalization
-# '''
-# def batch_norm(x, is_train=True, decay=0.99, epsilon=0.001):                                          
-#   shape_x = x.get_shape().as_list()
-  
-#   beta = tf.get_variable('beta', shape_x[-1], initializer=tf.constant_initializer(0.0))
-  
-#   gamma = tf.get_variable('gamma', shape_x[-1], initializer=tf.constant_initializer(1.0))
-#   moving_mean = tf.get_variable('moving_mean', shape_x[-1],
-#                 initializer=tf.constant_initializer(0.0), trainable=False)
-#   moving_var = tf.get_variable('moving_var', shape_x[-1],
-#                initializer=tf.constant_initializer(1.0), trainable=False)
+  # use tf.depthwise_conv2d
+  x = tf.nn.depthwise_conv2d(x, W_depth, strides=[1, 1, 1, 1], padding='SAME') + b_depth
+
+  x = tf.contrib.layers.batch_norm(x, is_training=is_train, scale=True, fused=True, updates_collections=None)
+  x = tf.nn.relu(x)
+
+  '''
+    pointwise conv
+  '''
+  W_point = tf.get_variable('point_weights', [1, 1, in_channels, out_channels],
+        initializer = tf.truncated_normal_initializer(stddev=0.1))
+  # weight decay if wd is larger than 0
+  W_point = varWeightDecay(W_point, wd) if wd > 0 else W_point
+  b_point = tf.get_variable('point_biases', [1, 1, 1, out_channels], initializer = tf.constant_initializer(0.0))
+
+  x = tf.nn.conv2d(x, W_point, strides=[1, 1, 1, 1], padding='SAME') + b_point
+
+  x = tf.contrib.layers.batch_norm(x, is_training=is_train, scale=True, fused=True, updates_collections=None)
+  x = tf.nn.relu(x)
+
+  return x
+
+'''
+  ResNet Block
+'''
+def ResBlock(x, in_channels, out_channels, weight1_size, weight2_size, identity_size, is_train, reuse, wd=0.0):
+  '''
+    weight layers 
+  '''
+  W_wl_1 = tf.get_variable('weight1', [weight1_size, weight1_size, in_channels, out_channels],
+        initializer = tf.truncated_normal_initializer(stddev=0.1))
+  W_wl_1 = varWeightDecay(W_wl_1, wd) if wd > 0 else W_wl_1
+  b_wl_1 = tf.get_variable('bias1', [1, 1, 1, out_channels], initializer = tf.constant_initializer(0.0))
+
+  x_w = tf.nn.conv2d(x, W_wl_1, strides=[1, 1, 1, 1], padding='SAME') + b_wl_1
+  x_w = tf.contrib.layers.batch_norm(x_w, is_training=is_train, scale=True, fused=True, updates_collections=None)
+  x_w = tf.nn.relu(x_w)
+
+  W_wl_2 = tf.get_variable('weight2', [weight2_size, weight2_size, out_channels, out_channels],
+        initializer = tf.truncated_normal_initializer(stddev=0.1))
+  W_wl_2 = varWeightDecay(W_wl_2, wd) if wd > 0 else W_wl_2
+  b_wl_2 = tf.get_variable('bias2', [1, 1, 1, out_channels], initializer = tf.constant_initializer(0.0))
+
+  x_w = tf.nn.conv2d(x_w, W_wl_2, strides=[1, 1, 1, 1], padding='SAME') + b_wl_2
+  x_w = tf.contrib.layers.batch_norm(x_w, is_training=is_train, scale=True, fused=True, updates_collections=None)
+
+  '''
+    identity layers
+  '''
+  W_idty = tf.get_variable('weight_idty', [identity_size, identity_size, in_channels, out_channels],
+    initializer = tf.truncated_normal_initializer(stddev=0.1))
+  W_idty = varWeightDecay(W_idty, wd) if wd > 0 else W_idty
+  b_idty = tf.get_variable('bias_idty', [1, 1, 1, out_channels], initializer = tf.constant_initializer(0.0))
+
+  x_idty = tf.nn.conv2d(x, W_idty, strides=[1, 1, 1, 1], padding='SAME') + b_idty
+  x_idty = tf.contrib.layers.batch_norm(x_idty, is_training=is_train, scale=True, fused=True, updates_collections=None)
+
+  # combine the identity and weighted outputs, then nonlinearize it 
+  out = tf.nn.relu(x_idty + x_w)
+
+  return out
 
 
-#   if is_train:
-#     mean, var = tf.nn.moments(x, np.arange(len(shape_x) - 1), keep_dims=True)
-#     mean = tf.reshape(mean, [mean.shape.as_list()[-1]])
-#     var = tf.reshape(var, [var.shape.as_list()[-1]])
 
-#     update_moving_mean = tf.assign(moving_mean, moving_mean * decay + mean * (1 - decay))
-#     update_moving_var = tf.assign(moving_var, moving_var * decay + shape_x[0] / (shape_x[0] - 1) * var * (1 - decay))
-#     update_ops = [update_moving_mean, update_moving_var]
-
-#     with tf.control_dependencies(update_ops):
-#       return tf.nn.batch_normalization(x, mean, var, beta, gamma, epsilon)
-
-#   else:
-#     mean = moving_mean
-#     var = moving_var
-#     return tf.nn.batch_normalization(x, mean, var, beta, gamma, epsilon)
+'''
+  Weight decay 
+'''
+def varWeightDecay(var, wd_ration):
+  weight_decay = tf.multiply(tf.nn.l2_loss(var), wd_ration, name='weight_loss')
+  tf.add_to_collection('losses', weight_decay)
+  return var

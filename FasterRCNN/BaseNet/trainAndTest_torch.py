@@ -15,7 +15,7 @@ from utils import *
 '''
   Different file contains various models
 '''
-from p1_model import *
+from basemodel import *
 
 
 # define global variables

@@ -1,5 +1,9 @@
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
+import os
+from PIL import Image
+import pdb
 
 def merge(images, size):
   h, w = images.shape[1], images.shape[2]
@@ -24,7 +28,6 @@ def lrelu(x, leak=0.2, name="lrelu"):
 # fully connected layer
 def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
   shape = input_.get_shape().as_list()
-
   with tf.variable_scope(scope or "Linear"):
     matrix = tf.get_variable("Matrix", [shape[1], output_size], tf.float32,
                  tf.random_normal_initializer(stddev=stddev))
@@ -81,3 +84,43 @@ def deconv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,
 def batch_norm(x, momentum, epsilon, name, train=True):
   return tf.contrib.layers.batch_norm(x, decay=momentum, updates_collections=None,
                       epsilon=epsilon, scale=True, is_training=train, scope=name)
+
+
+
+'''
+  plot curver between iteration times and loss or accuracy
+  - Input iteration: the iteration times of training
+  - Iuput loss: loss value during the training process
+  - Input accuracy: prediction accuracy during the training process
+'''
+def processPlot_loss(iteration, d_loss, g_loss):
+  fig, (Ax0, Ax1) = plt.subplots(2, 1, figsize = (8, 20))
+
+  x = np.arange(0, iteration, 1)
+
+  Ax0.plot(x, d_loss)
+  Ax0.set_title('Model D Loss vs Iterations') 
+  Ax0.set_xlabel('iteration times')
+  Ax0.set_ylabel('loss value')
+  Ax0.grid(True)
+  
+
+  Ax1.plot(x, g_loss)
+  Ax1.set_title('Model G Loss vs Iterations')
+  Ax1.set_xlabel('iteration times')
+  Ax1.set_ylabel('loss value')
+  Ax1.grid(True)
+
+  plt.show()
+
+
+'''
+  plot accuracy and loss curve wrt the iteration times
+'''
+def processPlot():
+  loss_d = np.load('res/loss_modelD.npy')
+  loss_g = np.load('res/loss_modelG.npy')
+
+  total = loss_d.shape[0]
+
+  processPlot_loss(total, loss_d, loss_g)

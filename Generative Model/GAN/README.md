@@ -1,11 +1,11 @@
-Generative Adversarial Nets
----------------------------
+# Generative Adversarial Nets
 
-# DCGAN        
-Loss curve (CUFS dataset)
+DCGAN        
+-----
+Loss curve (CUFS dataset)      
 <p align="center">
   <img src = "./dcgan_res/cufs_curve/loss_curve.png?raw=true">
 </p>
 
-Generated faces
+Generated faces         
 ![Alt text](./dcgan_res/cufs_samples/samples.gif)

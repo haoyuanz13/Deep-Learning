@@ -1,6 +1,6 @@
 # Generative Adversarial Nets
 
-DCGAN        
+DCGAN (Deep Convolutional GAN)        
 -----   
 
 CUFS dataset
@@ -19,7 +19,7 @@ celebA dataset
   <img src = "./dcgan_res/celeba_samples/samples.gif?raw=true" width="350" height="350">
 </p>
 
-WGAN-GP
+WGAN-GP (Wasserstein GAN with Gradient Penalty)
 -------
 
 CUFS dataset

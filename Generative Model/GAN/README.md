@@ -1,7 +1,9 @@
 # Generative Adversarial Nets
 
 DCGAN        
------    
+-----   
+
+CUFS dataset
 <p >
 <align="left">
   <img src = "./dcgan_res/cufs_curve/loss_curve.png?raw=true" width="400" height="400">

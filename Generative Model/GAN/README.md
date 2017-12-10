@@ -3,8 +3,8 @@
 DCGAN        
 -----
 Loss curve (CUFS dataset)      
-<p align="center">
-  <img src = "./dcgan_res/cufs_curve/loss_curve.png?raw=true">
+<p align="left">
+  <img src = "./dcgan_res/cufs_curve/loss_curve.png?raw=true" width="20" height="20">
 </p>
 
 Generated faces         

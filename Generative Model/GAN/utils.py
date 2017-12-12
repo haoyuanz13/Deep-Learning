@@ -18,10 +18,10 @@ flags.DEFINE_string("dcgan_sampledir_cufs", 'dcgan_res/cufs_samples', "Directory
 flags.DEFINE_string("dcgan_sampledir_celeba", 'dcgan_res/celeba_samples', "Directory to save celeba samples (dcgan)")
 flags.DEFINE_string("dcgan_curve_cufs", 'dcgan_res/cufs_curve', "Directory to save cufs loss curve (dcgan)")
 flags.DEFINE_string("dcgan_curve_celeba", 'dcgan_res/celeba_curve', "Directory to save celeba loss curve (dcgan)")
-flags.DEFINE_string("wgan_sampledir_cufs", 'wgan_res/cufs_samples', "Directory to save cufs samples (wgan)")
-flags.DEFINE_string("wgan_sampledir_celeba", 'wgan_res/celeba_samples', "Directory to save celeba samples (wgan)")
-flags.DEFINE_string("wgan_curve_cufs", 'wgan_res/cufs_curve', "Directory to save cufs loss curve (wgan)")
-flags.DEFINE_string("wgan_curve_celeba", 'wgan_res/celeba_curve', "Directory to save celeba loss curve (wgan)")
+flags.DEFINE_string("wgan_gp_sampledir_cufs", 'wgan_gp_res/cufs_samples', "Directory to save cufs samples (wgan_gp)")
+flags.DEFINE_string("wgan_gp_sampledir_celeba", 'wgan_gp_res/celeba_samples', "Directory to save celeba samples (wgan_gp)")
+flags.DEFINE_string("wgan_gp_curve_cufs", 'wgan_gp_res/cufs_curve', "Directory to save cufs loss curve (wgan_gp)")
+flags.DEFINE_string("wgan_gp_curve_celeba", 'wgan_gp_res/celeba_curve', "Directory to save celeba loss curve (wgan_gp)")
 FLAGS = flags.FLAGS
 
 
@@ -196,10 +196,10 @@ def processPlot(dcgan=True, cufs=True):
     path = FLAGS.dcgan_curve_celeba
 
   if (not dcgan) and cufs:
-    path = FLAGS.wgan_curve_cufs
+    path = FLAGS.wgan_gp_curve_cufs
 
   if (not dcgan) and (not cufs):
-    path = FLAGS.wgan_curve_celeba
+    path = FLAGS.wgan_gp_curve_celeba
 
   loss_d = np.load(path + '/loss_modelD.npy')
   loss_g = np.load(path + '/loss_modelG.npy')
@@ -220,10 +220,10 @@ def gifGenerate(dcgan=True, cufs=True):
     path = FLAGS.dcgan_sampledir_celeba
 
   if (not dcgan) and cufs:
-    path = FLAGS.wgan_sampledir_cufs
+    path = FLAGS.wgan_gp_sampledir_cufs
 
   if (not dcgan) and (not cufs):
-    path = FLAGS.wgan_sampledir_celeba
+    path = FLAGS.wgan_gp_sampledir_celeba
 
   imgs = []
   print (path)

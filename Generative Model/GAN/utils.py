@@ -18,10 +18,16 @@ flags.DEFINE_string("dcgan_sampledir_cufs", 'dcgan_res/cufs_samples', "Directory
 flags.DEFINE_string("dcgan_sampledir_celeba", 'dcgan_res/celeba_samples', "Directory to save celeba samples (dcgan)")
 flags.DEFINE_string("dcgan_curve_cufs", 'dcgan_res/cufs_curve', "Directory to save cufs loss curve (dcgan)")
 flags.DEFINE_string("dcgan_curve_celeba", 'dcgan_res/celeba_curve', "Directory to save celeba loss curve (dcgan)")
+
 flags.DEFINE_string("wgan_gp_sampledir_cufs", 'wgan_gp_res/cufs_samples', "Directory to save cufs samples (wgan_gp)")
 flags.DEFINE_string("wgan_gp_sampledir_celeba", 'wgan_gp_res/celeba_samples', "Directory to save celeba samples (wgan_gp)")
 flags.DEFINE_string("wgan_gp_curve_cufs", 'wgan_gp_res/cufs_curve', "Directory to save cufs loss curve (wgan_gp)")
 flags.DEFINE_string("wgan_gp_curve_celeba", 'wgan_gp_res/celeba_curve', "Directory to save celeba loss curve (wgan_gp)")
+
+flags.DEFINE_string("wgan_sampledir_cufs", 'wgan_res/cufs_samples', "Directory to save cufs samples (wgan)")
+flags.DEFINE_string("wgan_sampledir_celeba", 'wgan_res/celeba_samples', "Directory to save celeba samples (wgan)")
+flags.DEFINE_string("wgan_curve_cufs", 'wgan_res/cufs_curve', "Directory to save cufs loss curve (wgan)")
+flags.DEFINE_string("wgan_curve_celeba", 'wgan_res/celeba_curve', "Directory to save celeba loss curve (wgan)")
 FLAGS = flags.FLAGS
 
 
@@ -188,18 +194,18 @@ def processPlot_loss(path, iteration, d_loss, g_loss):
 '''
   plot accuracy and loss curve wrt the iteration times
 '''
-def processPlot(dcgan=True, cufs=True):
-  if dcgan and cufs:
-    path = FLAGS.dcgan_curve_cufs
+def processPlot(ganType=0, cufs=True):
+  if ganType == 0:
+    print ("======> Loss curve generated from DCGAN model")
+    path = FLAGS.dcgan_curve_cufs if cufs else FLAGS.dcgan_curve_celeba
 
-  if dcgan and (not cufs):
-    path = FLAGS.dcgan_curve_celeba
+  if ganType == 1:
+    print ("======> Loss curve generated from WGAN model")
+    path = FLAGS.wgan_curve_cufs if cufs else FLAGS.wgan_curve_celeba
 
-  if (not dcgan) and cufs:
-    path = FLAGS.wgan_gp_curve_cufs
-
-  if (not dcgan) and (not cufs):
-    path = FLAGS.wgan_gp_curve_celeba
+  if ganType == 2:
+    print ("======> Loss curve generated from WGAN-GP model")
+    path = FLAGS.wgan_gp_curve_cufs if cufs else FLAGS.wgan_gp_curve_celeba
 
   loss_d = np.load(path + '/loss_modelD.npy')
   loss_g = np.load(path + '/loss_modelG.npy')
@@ -212,18 +218,18 @@ def processPlot(dcgan=True, cufs=True):
 '''
   generate gif
 '''
-def gifGenerate(dcgan=True, cufs=True):
-  if dcgan and cufs:
-    path = FLAGS.dcgan_sampledir_cufs
+def gifGenerate(ganType=0, cufs=True):
+  if ganType == 0:
+    print ("======> Samples generated from DCGAN model")
+    path = FLAGS.dcgan_sampledir_cufs if cufs else FLAGS.dcgan_sampledir_celeba
 
-  if dcgan and (not cufs):
-    path = FLAGS.dcgan_sampledir_celeba
+  if ganType == 1:
+    print ("======> Samples generated from WGAN model")
+    path = FLAGS.wgan_sampledir_cufs if cufs else FLAGS.wgan_sampledir_celeba
 
-  if (not dcgan) and cufs:
-    path = FLAGS.wgan_gp_sampledir_cufs
-
-  if (not dcgan) and (not cufs):
-    path = FLAGS.wgan_gp_sampledir_celeba
+  if ganType == 2:
+    print ("======> Samples generated from WGAN-GP model")
+    path = FLAGS.wgan_gp_sampledir_cufs if cufs else FLAGS.wgan_gp_sampledir_celeba
 
   imgs = []
   print (path)
@@ -235,9 +241,17 @@ def gifGenerate(dcgan=True, cufs=True):
 
 
 
-
 if __name__ == "__main__":
-  # processPlot()
-  gifGenerate(dcgan=False, cufs=True)
+  '''
+    GAN Type
+    - 0: DCGAN
+    - 1: WGAN
+    - 2: WGAN-GP
+  '''
+  processPlot(ganType=1, cufs=True)
+  # gifGenerate(ganType=0, cufs=True)
+
+
+
 
 

@@ -15,13 +15,16 @@ import tensorflow as tf
 import numpy as np
 import pdb
   
+shapeVisual = False
 
 # max pooling layer
 def maxPool(h, name):
   out = tf.nn.max_pool(h, ksize=[1, 2, 2, 1], 
     strides=[1, 2, 2, 1], padding='SAME', name=name)
 
-  # print name, " | out shape: ", out.get_shape().as_list()
+  if shapeVisual:
+    print name, " | out shape: ", out.get_shape().as_list()
+  
   return out
 
 
@@ -53,8 +56,10 @@ def ConvBlock(x, in_channels, out_channels, kernel_size, stride, is_train, reuse
       scale=True, fused=True, updates_collections=None)
 
     out = tf.nn.relu(out)
-
-  # print name, " | out shape: ", out.get_shape().as_list()
+  
+  if shapeVisual:
+    print name, " | out shape: ", out.get_shape().as_list()
+  
   return out
 
 
@@ -77,7 +82,9 @@ def FcBlock(x, in_channels, out_channels, is_train, reuse, wd=0.0, name='FC'):
     
     out = tf.nn.relu(out)
 
-  # print name, " | out shape: ", out.get_shape().as_list()
+  if shapeVisual:
+    print name, " | out shape: ", out.get_shape().as_list()
+  
   return out
 
 
@@ -115,7 +122,9 @@ def MobileBloack(x, in_channels, out_channels, depth_kernel_size_h, depth_kernel
     out = tf.contrib.layers.batch_norm(out, is_training=is_train, scale=True, fused=True, updates_collections=None)
     out = tf.nn.relu(out)
 
-  # print name, " | out shape: ", out.get_shape().as_list()
+  if shapeVisual:
+    print name, " | out shape: ", out.get_shape().as_list()
+  
   return out
 
 
@@ -158,7 +167,11 @@ def ResBlock(x, in_channels, out_channels, weight1_size, weight2_size, identity_
     # combine the identity and weighted outputs, then nonlinearize it 
     out = tf.nn.relu(x_idty + x_w)
 
-  # print name, " | out shape: ", out.get_shape().as_list()
+  if shapeVisual:
+    print name, " | out shape: ", out.get_shape().as_list()
+  
   return out
+
+
 
 

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 '''
   File name: models.py
   Author: Haoyuan Zhang
@@ -11,6 +12,8 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
 import tensorflow as tf
+import tensorflow.contrib.slim as slim
+from functools import partial
 import numpy as np
 import pdb
 
@@ -82,7 +85,68 @@ def BaseNet(view, input_channel, weight_decay_ratio=0.0, ind_base=0, reuse=True,
       data_conv5 = maxPool(data_conv4, name='maxPooling5')
 
 
-  # obtain all variables of faster rcnn
+  # obtain all variables of the base net
   var_all = tf.contrib.framework.get_variables(base)
 
   return var_all, data_conv5
+
+
+'''
+  Fully Connected Layers for bbox regression bracnh
+'''
+def FullyConnectedNet(feaMap, input_channel, weight_decay_ratio=0.0, reuse=True, is_train=True, name='regFCN'):
+  with tf.variable_scope(name, reuse=reuse) as fcn:
+   # fully connected layer: convert from input_channel to 1024
+    with tf.variable_scope('FC1', reuse=reuse) as fc1:
+      feaMap = FcBlock(feaMap, input_channel, 1024, is_train=is_train, reuse=reuse, wd=weight_decay_ratio)
+
+    # fully connected layer: convert from 1024 to 256
+    with tf.variable_scope('FC2', reuse=reuse) as fc2:
+      feaMap = FcBlock(feaMap, 1024, 256, is_train=is_train, reuse=reuse, wd=weight_decay_ratio)
+
+    # fully connected layer: convert from 256 to 4
+    with tf.variable_scope('FC3', reuse=reuse) as fc3:
+      feaMap = FcBlock(feaMap, 256, 4, is_train=is_train, reuse=reuse, wd=weight_decay_ratio)
+
+  # obtain all variables of fcn block
+  var_all = tf.contrib.framework.get_variables(fcn)
+
+  return var_all, feaMap
+
+
+
+'''
+  Deconvolutional layers for the depth branch
+'''
+def deConvBlocks(feaMap, reuse=True, is_train=True, name='depthDeconv'):
+  # batch normalize layer
+  batch_norm = partial(slim.batch_norm, decay=0.9, scale=True, epsilon=1e-5, updates_collections=None)
+  bn = partial(batch_norm, is_training=is_train)
+
+  # deconvolutional layer
+  dconv = partial(slim.conv2d_transpose, activation_fn=None, weights_initializer=tf.random_normal_initializer(stddev=0.02))
+
+  # stacked layer: dconv + bn + relu
+  dconv_bn_relu = partial(dconv, normalizer_fn=bn, activation_fn=tf.nn.relu, biases_initializer=None)
+
+  # Deconv Blocks
+  with tf.variable_scope(name, reuse=reuse) as deconvBlock:
+    # 1st deconv: [N, 4, 4, 256] -> [N, 8, 8,128]
+    feaMap = dconv_bn_relu(feaMap, 128, 3, 2)
+
+    # 2nd deconv: [N, 8, 8, 128] -> [N, 16, 16,128]
+    feaMap = dconv_bn_relu(feaMap, 128, 3, 2)
+
+    # 3rd deconv: [N, 16, 16, 128] -> [N, 32, 32,64]
+    feaMap = dconv_bn_relu(feaMap, 64, 3, 2)
+
+    # 4th deconv: [N, 32, 32, 64] -> [N, 64, 64,32]
+    feaMap = dconv_bn_relu(feaMap, 32, 3, 2)
+
+    # 5th deconv: [N, 64, 64, 32] -> [N, 128, 128,1]
+    feaMap = dconv_bn_relu(feaMap, 1, 3, 2)
+  
+  # ovtain variables
+  var_all = tf.contrib.framework.get_variables(deconvBlock)
+
+  return var_all, feaMap

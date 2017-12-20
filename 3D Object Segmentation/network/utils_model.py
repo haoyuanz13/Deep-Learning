@@ -99,10 +99,22 @@ def L2Loss(y_pred, y_gt):
   - Iuput loss: loss value during the training process
   - Input accuracy: prediction accuracy during the training process
 '''
-def processPlot_acc_loss(iteration, loss, accuracy, test_loss, test_acc, title):
+def processPlot_acc_loss(iteration, loss, accuracy, test_loss, test_acc, title, takeAvg=True, showAcc=True):
   fig, (Ax0, Ax1) = plt.subplots(1, 2, figsize = (16, 8))
 
   x = np.arange(0, iteration, 1)
+
+  if takeAvg:
+    new_loss = np.zeros_like(loss)
+    new_acc = np.zeros_like(accuracy)
+
+    for i in xrange(iteration):
+      new_loss[i] = np.mean(loss[:i+1])
+      new_acc[i] = np.mean(accuracy[:i+1])
+
+    loss = new_loss
+    accuracy = new_acc
+
 
   Ax0.plot(x, loss)
   # Ax0.text(0.5, 80, , fontsize=12)
@@ -117,14 +129,23 @@ def processPlot_acc_loss(iteration, loss, accuracy, test_loss, test_acc, title):
   
 
   Ax1.plot(x, accuracy)
-
-  Ax1.text(0.95, 0.01, 'The average test accuracy is {:.4f}%'.format(test_acc * 100),
-        verticalalignment='bottom', horizontalalignment='right', transform=Ax1.transAxes,
-        color='red', fontsize=15)
-  Ax1.set_title('Prediction Accuracy')
   Ax1.set_xlabel('iteration times')
-  Ax1.set_ylabel('Accuracy')
   Ax1.grid(True)
+
+  if showAcc: 
+    Ax1.text(0.95, 0.01, 'The average test accuracy is {:.4f}%'.format(test_acc * 100),
+          verticalalignment='bottom', horizontalalignment='right', transform=Ax1.transAxes,
+          color='red', fontsize=15)
+    Ax1.set_title('Prediction Accuracy')
+    Ax1.set_ylabel('Accuracy')
+
+  else:
+    Ax1.text(0.95, 0.01, 'The average test diff distance is {:.4f}'.format(test_acc),
+          verticalalignment='bottom', horizontalalignment='right', transform=Ax1.transAxes,
+          color='red', fontsize=15)
+    Ax1.set_title('Prediction Diff Distance')
+    Ax1.set_ylabel('Diff Distance')
+
 
   plt.suptitle(title, fontsize=16)
   plt.show()
@@ -150,13 +171,12 @@ def processPlot(ind_base):
   processPlot_acc_loss(total, train_cls_loss, train_cls_acc, test_res_cls[0], test_res_cls[1], title)
 
   title = 'Reg Branch: Training Loss and Accuracy Curves wrt the iteration (Include Test Result)'
-  processPlot_acc_loss(total, train_reg_loss, train_reg_acc, test_res_reg[0], test_res_reg[1], title)
+  processPlot_acc_loss(total, train_reg_loss, train_reg_acc, test_res_reg[0], test_res_reg[1], title, showAcc=False)
 
   title = 'Depth Branch: Training Loss and Accuracy Curves wrt the iteration (Include Test Result)'
-  processPlot_acc_loss(total, train_depth_loss, train_depth_acc, test_res_depth[0], test_res_depth[1], title)
+  processPlot_acc_loss(total, train_depth_loss, train_depth_acc, test_res_depth[0], test_res_depth[1], title, showAcc=False)
 
 
 if __name__ == '__main__':
-  processPlot(2)
-
+  processPlot(0)
   

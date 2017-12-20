@@ -36,7 +36,7 @@ flags.DEFINE_integer("step", 100, "The step in each epoch iteration [100]")
 flags.DEFINE_integer("iteration", 2000, "The max iteration times [1000]")
 flags.DEFINE_integer("display_interval", 4, "The step interval to plot training loss and accuracy [10]")
 flags.DEFINE_integer("test_interval", 50, "The step interval to test model [40]")
-flags.DEFINE_integer("ind_base", 2, "The Conv block ind [0]")
+flags.DEFINE_integer("ind_base", 0, "The Conv block ind [0]")
 flags.DEFINE_integer("n_class", 10, "The total number of class type [10]")
 flags.DEFINE_float("weight_decay_ratio", 0.05, "weight decay ration [0.05]")
 flags.DEFINE_float("threshold_reg", 0.005, "the threshold of correct bbox estimation [0.005]")
@@ -119,8 +119,10 @@ def MVCNN(views, label, bbox, depth_gt, bs, reuse, is_train, ind_base):
       
       # reg accuracy
       with tf.variable_scope('regacc', reuse=reuse) as regacc:
-        valid = tf.cast(abs(reg_pred - bbox) < FLAGS.threshold_reg, tf.float32)
-        reg_acc = tf.reduce_mean(valid)
+        # valid = tf.cast(abs(reg_pred - bbox) < FLAGS.threshold_reg, tf.float32)
+        # reg_acc = tf.reduce_mean(valid)
+        reg_acc = 128 * tf.reduce_mean(tf.abs(reg_pred - bbox))
+        
 
 
     # depth branch
@@ -151,16 +153,21 @@ def MVCNN(views, label, bbox, depth_gt, bs, reuse, is_train, ind_base):
 
       # depth accuracy
       with tf.variable_scope('depthacc', reuse=reuse) as depthacc:
+        # correct = tf.reduce_sum(tf.where(
+        #     mask_obj, 
+        #     tf.cast(abs(depth_pred - depth_gt) < FLAGS.threshold_depth, tf.float32),
+        #     tf.zeros_like(depth_gt)
+        #   ))
         correct = tf.reduce_sum(tf.where(
             mask_obj, 
-            tf.cast(abs(depth_pred - depth_gt) < FLAGS.threshold_depth, tf.float32),
+            1000 * tf.abs(depth_pred - depth_gt),
             tf.zeros_like(depth_gt)
           ))
         depth_acc = correct / effect_region
 
 
   # combine loss
-  comb_loss = sf_loss + reg_loss + depth_loss
+  comb_loss = sf_loss + 5 * reg_loss + depth_loss
   # obtain all variables of faster rcnn
   var_mvcnn = tf.contrib.framework.get_variables(mvcnn)
 
@@ -174,8 +181,11 @@ def trainAndTest(dl_train, dl_test, ind_base):
   print 'The current base net is [' + net_label[ind_base] + ']'
 
   best_test_cls_loss, best_test_cls_acc = 100, 0
-  best_test_reg_loss, best_test_reg_acc = 100, 0
-  best_test_depth_loss, best_test_depth_acc = 100, 0
+  # best_test_reg_loss, best_test_reg_acc = 100, 0
+  # best_test_depth_loss, best_test_depth_acc = 100, 0
+  best_test_reg_loss, best_test_reg_acc = 100, 10000000
+  best_test_depth_loss, best_test_depth_acc = 100, 10000000
+
 
   image = tf.placeholder(tf.float32, [FLAGS.batch_size, 6, 128, 128, 3])  # x_image represents the input image
   label_gt = tf.placeholder(tf.int64, [FLAGS.batch_size])  # the ground truth label
@@ -188,7 +198,7 @@ def trainAndTest(dl_train, dl_test, ind_base):
 
   # define learning rate decay parameters
   global_step = tf.Variable(0, trainable=False)
-  starter_learning_rate = 0.005
+  starter_learning_rate = 0.001
   learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step, dl_train.step, 1 - 10 ** (-FLAGS.iteration), staircase=True)
 
   # train_step = tf.train.AdamOptimizer(1e-4).minimize(loss, var_list=var_all)
@@ -252,9 +262,13 @@ def trainAndTest(dl_train, dl_test, ind_base):
       comb_loss_sum += train_loss_comb
 
       if step_cur % FLAGS.display_interval == 0:
-        print('Train Epoch:{} [{}/{}]  Comb Loss: {:.8f}| Cls Loss: {:.8f}, Acc: {:.2f}%| Reg Loss: {:.8f}, Acc: {:.2f}%| Dep Loss: {:.8f}, Acc: {:.2f}%'.format(
+        # print('Train Epoch:{} [{}/{}]  Comb Loss: {:.8f}| Cls Loss: {:.8f}, Acc: {:.2f}%| Reg Loss: {:.8f}, Acc: {:.2f}%| Dep Loss: {:.8f}, Acc: {:.2f}%'.format(
+        #   epoch + 1, (step_cur + 1) * FLAGS.batch_size , dl_train.step * FLAGS.batch_size,  
+        #   train_loss_comb, train_loss_cls, 100. * train_acc_cls, train_loss_reg, 100. * train_acc_reg, train_loss_depth, 100. * train_acc_depth))
+
+        print('Train Epoch:{} [{}/{}]  Comb Loss: {:.8f}| Cls Loss: {:.8f}, Acc: {:.2f}%| Reg Loss: {:.8f}, Diff: {:.4f}| Dep Loss: {:.8f}, Diff: {:.4f}'.format(
           epoch + 1, (step_cur + 1) * FLAGS.batch_size , dl_train.step * FLAGS.batch_size,  
-          train_loss_comb, train_loss_cls, 100. * train_acc_cls, train_loss_reg, 100. * train_acc_reg, train_loss_depth, 100. * train_acc_depth))
+          train_loss_comb, train_loss_cls, 100. * train_acc_cls, train_loss_reg, train_acc_reg, train_loss_depth, train_acc_depth))
 
 
       # train the model
@@ -279,8 +293,10 @@ def trainAndTest(dl_train, dl_test, ind_base):
 
     # print the result for each epoch
     print '\n********************************* The {}th epoch training has completed using {} s *********************************'.format(epoch + 1, elapsed_time)
-    print 'Comb: Avg Loss is {:.8f}| Cls: Avg Loss is {:.8f}, Avg Acc is {:.2f}%| Reg: Avg Reg Loss is {:.8f}, Avg Acc is {:.2f}%| Dep: Avg Loss is {:.8f}, Avg Acc is {:.2f}%. \n'.format(
-      comb_loss_sum, cls_loss_sum, 100 * cls_acc_sum, reg_loss_sum, 100 * reg_acc_sum, depth_loss_sum, 100 * depth_acc_sum)
+    # print 'Comb: Avg Loss is {:.8f}| Cls: Avg Loss is {:.8f}, Avg Acc is {:.2f}%| Reg: Avg Reg Loss is {:.8f}, Avg Acc is {:.2f}%| Dep: Avg Loss is {:.8f}, Avg Acc is {:.2f}%. \n'.format(
+    #   comb_loss_sum, cls_loss_sum, 100 * cls_acc_sum, reg_loss_sum, 100 * reg_acc_sum, depth_loss_sum, 100 * depth_acc_sum)
+    print 'Comb: Avg Loss is {:.8f}| Cls: Avg Loss is {:.8f}, Avg Acc is {:.2f}%| Reg: Avg Reg Loss is {:.8f}, Avg Diff is {:.4f}| Dep: Avg Loss is {:.8f}, Avg Diff is {:.4f}. \n'.format(
+      comb_loss_sum, cls_loss_sum, 100 * cls_acc_sum, reg_loss_sum, reg_acc_sum, depth_loss_sum, depth_acc_sum)
 
     # store results
     list_loss_comb[epoch, 0] = comb_loss_sum
@@ -338,18 +354,22 @@ def trainAndTest(dl_train, dl_test, ind_base):
         best_test_cls_acc = test_cls_acc
         best_test_cls_loss = test_cls_loss
 
-      if test_reg_acc > best_test_reg_acc:
+      if test_reg_acc < best_test_reg_acc:
         best_test_reg_acc = test_reg_acc
         best_test_reg_loss = test_reg_loss
 
-      if test_dep_acc > best_test_depth_acc:
+      if test_dep_acc < best_test_depth_acc:
         best_test_depth_acc = test_dep_acc
         best_test_depth_loss = test_dep_loss
 
 
+      # print 'The Test Cls Loss is {:.6f}, Acc is {:.2f}%, The [Best Acc] so far is {:.2f}%.'.format(test_cls_loss, 100 * test_cls_acc, 100 * best_test_cls_acc)
+      # print 'The Test Reg Loss is {:.6f}, Acc is {:.2f}%, The [Best Acc] so far is {:.2f}%.'.format(test_reg_loss, 100 * test_reg_acc, 100 * best_test_reg_acc)
+      # print 'The Test Dep Loss is {:.6f}, Acc is {:.2f}%, The [Best Acc] so far is {:.2f}%.'.format(test_dep_loss, 100 * test_dep_acc, 100 * best_test_depth_acc)
+
       print 'The Test Cls Loss is {:.6f}, Acc is {:.2f}%, The [Best Acc] so far is {:.2f}%.'.format(test_cls_loss, 100 * test_cls_acc, 100 * best_test_cls_acc)
-      print 'The Test Reg Loss is {:.6f}, Acc is {:.2f}%, The [Best Acc] so far is {:.2f}%.'.format(test_reg_loss, 100 * test_reg_acc, 100 * best_test_reg_acc)
-      print 'The Test Dep Loss is {:.6f}, Acc is {:.2f}%, The [Best Acc] so far is {:.2f}%.'.format(test_dep_loss, 100 * test_dep_acc, 100 * best_test_depth_acc)
+      print 'The Test Reg Loss is {:.6f}, Diff is {:.4f}, The [Best Diff] so far is {:.2f}.'.format(test_reg_loss, test_reg_acc, best_test_reg_acc)
+      print 'The Test Dep Loss is {:.6f}, Diff is {:.2f}, The [Best Diff] so far is {:.2f}.'.format(test_dep_loss, test_dep_acc, best_test_depth_acc)
       print '==========================================================================================================='
 
       # save loss and accuracy

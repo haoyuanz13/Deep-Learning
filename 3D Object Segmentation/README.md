@@ -1,5 +1,6 @@
 # 3D object classification, segmentation and 3D bbox estimation
 
+The report is here: [./res](3d_objectDetection_report.pdf)
 The whole model diagram
 -----------------------
 <p >

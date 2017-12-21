@@ -27,11 +27,19 @@ Explanations on deep network
 
 Training and Test Results
 -------------------------
+
 <p >
-<align="right">
+<align="center">
   <img src = "./res/cls_2000_res.png?raw=true" width="350" height="350">
+</p>
+  
+<p >
 <align="center">
   <img src = "./res/reg_2000_res.png?raw=true" width="350" height="350">
-<align="left">
+</p>
+
+<p >
+<align="center">
   <img src = "./res/depth_2000_res.png?raw=true" width="350" height="350">
 </p>
+

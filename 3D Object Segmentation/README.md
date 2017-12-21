@@ -59,7 +59,7 @@ Estimated Results
 -----------------
 <p >
 <align="letf">
-  <img src = "./doc/3dbboxDigit4.png?raw=true" width="400" height="350">
-<align="rightr">
   <img src = "./doc/3dbboxDigit5.png?raw=true" width="400" height="350">
+<align="rightr">
+  <img src = "./doc/3dbboxDigit9.png?raw=true" width="400" height="350">
 </p>

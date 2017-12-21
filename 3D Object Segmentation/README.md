@@ -1,11 +1,15 @@
 # 3D object classification, segmentation and 3D bbox estimation               
 
 Please feel free to check the detailed report: [3D object recognition and 3D bbox estimation](./res/3d_objectDetection_report.pdf)           
+
+
 The main contributions
 ----------------------
 1. 3D Data (3D MNIST) Pre-Processing, including the Voxel generation and 2D multiple views generation.
 2. Deep network construction which can estimate class label, depth map and 2D bbox in one single stage.
 3. 3D bounding box estimation.
+
+
 
 The whole model diagram
 -----------------------

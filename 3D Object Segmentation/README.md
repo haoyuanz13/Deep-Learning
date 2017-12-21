@@ -23,5 +23,15 @@ Explanations on deep network
    - reg: use a 4d vector [x_min, x_max, y_min, y_max] to represent single bbox. Flatten feature maps, then feed into the Fully connected block, all views share the same FC block (the similar idea as the sharing Basenet which can make the FC block handle all views information), finally compute the l2 loss.                
    - depth: use the Deconv Block (the similar strategy as semantic segmentation) which can keep the spatial information, then implement the pixelwise loss computation, only consider the depth information locate in 2D bbox region (ignore backgrounds) for the fast training, also provide better performance.            
    
-3. Weighted-sum loss (Multi-task loss) to train the three branches in one single state. 
+3. Weighted-sum loss (Multi-task loss) to train the three branches in one single state.           
 
+Training and Test Results
+-------------------------
+<p >
+<align="right">
+  <img src = "./res/cls_2000_res.png?raw=true" width="350" height="350">
+<align="center">
+  <img src = "./res/reg_2000_res.png?raw=true" width="350" height="350">
+<align="left">
+  <img src = "./res/depth_2000_res.png?raw=true" width="350" height="350">
+</p>

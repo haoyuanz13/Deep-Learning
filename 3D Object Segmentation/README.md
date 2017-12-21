@@ -11,7 +11,7 @@ The deep network architecture
 -----------------------------
 <p >
 <align="center">
-  <img src = "./doc/network.jpg?raw=true" width="800" height="400">
+  <img src = "./doc/network.jpg?raw=true" width="900" height="450">
 </p>
 
 Explanations on deep network               

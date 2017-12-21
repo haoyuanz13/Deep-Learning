@@ -55,7 +55,7 @@ Training and Test Results
 </p>
 
 
-Estimated Results
+Estimated Results (Digit 5 (left) and Digit 9 (right))
 -----------------
 <p >
 <align="letf">

@@ -54,3 +54,12 @@ Training and Test Results
   <img src = "./res/depth_2000_res.png?raw=true" width="800" height="400">
 </p>
 
+
+Estimated Results
+-----------------
+<p >
+<align="letf">
+  <img src = "./doc/3dbboxDigit4.png?raw=true" width="400" height="350">
+<align="rightr">
+  <img src = "./doc/3dbboxDigit5.png?raw=true" width="400" height="350">
+</p>

@@ -15,8 +15,8 @@ from utils import progress_bar
 # Choose start index and end index of data points that we want to compute. 
 # This help do data processing in parallel 
 
-start_indx = 2600
-end_indx = 2700
+start_indx = 0
+end_indx = 3000
 
 # Choose mode 'train' or 'test'
 mode = 'train'

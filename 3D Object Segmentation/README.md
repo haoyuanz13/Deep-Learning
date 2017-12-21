@@ -1,5 +1,4 @@
 # 3D object classification, segmentation and 3D bbox estimation
-[3D Object recognition and 3D bbox estimation report] (sftp://haoyuan@158.130.52.13/home/haoyuan/code/3DObj/res/3d_objectDetection_report.pdf)
 
 The whole model diagram
 -----------------------

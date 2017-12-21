@@ -135,8 +135,6 @@ class CamModel(object):
 
     return two_D_img,  three_D_img, bbox
    
- 
-
   def test_project_3d_2d(self):
     # Load data 
     data_path = './data/3d-mnist/'

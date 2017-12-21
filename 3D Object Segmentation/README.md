@@ -30,16 +30,16 @@ Training and Test Results
 
 <p >
 <align="center">
-  <img src = "./res/cls_2000_res.png?raw=true" width="350" height="350">
+  <img src = "./res/cls_2000_res.png?raw=true" width="600" height="350">
 </p>
   
 <p >
 <align="center">
-  <img src = "./res/reg_2000_res.png?raw=true" width="350" height="350">
+  <img src = "./res/reg_2000_res.png?raw=true" width="600" height="350">
 </p>
 
 <p >
 <align="center">
-  <img src = "./res/depth_2000_res.png?raw=true" width="350" height="350">
+  <img src = "./res/depth_2000_res.png?raw=true" width="600" height="350">
 </p>
 

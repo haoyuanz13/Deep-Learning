@@ -33,6 +33,11 @@ flags.DEFINE_string("ae_sampledir_cufs", 'ae_res/cufs_samples', "Directory to sa
 flags.DEFINE_string("ae_sampledir_celeba", 'ae_res/celeba_samples', "Directory to save celeba samples (ae)")
 flags.DEFINE_string("ae_curve_cufs", 'ae_res/cufs_curve', "Directory to save cufs loss curve (ae)")
 flags.DEFINE_string("ae_curve_celeba", 'ae_res/celeba_curve', "Directory to save celeba loss curve (ae)")
+
+flags.DEFINE_string("vae_sampledir_cufs", 'vae_res/cufs_samples', "Directory to save cufs samples (vae)")
+flags.DEFINE_string("vae_sampledir_celeba", 'vae_res/celeba_samples', "Directory to save celeba samples (vae)")
+flags.DEFINE_string("vae_curve_cufs", 'vae_res/cufs_curve', "Directory to save cufs loss curve (vae)")
+flags.DEFINE_string("vae_curve_celeba", 'vae_res/celeba_curve', "Directory to save celeba loss curve (vae)")
 FLAGS = flags.FLAGS
 
 
@@ -314,9 +319,9 @@ def gifGenerate_AEs(aeType=0, cufs=True):
     print ("======> Samples generated from AutoEncoder model")
     path = FLAGS.ae_sampledir_cufs if cufs else FLAGS.ae_sampledir_celeba
 
-  # if aeType == 1:
-  #   print ("======> Samples generated from VAE model")
-  #   path = FLAGS.vae_sampledir_cufs if cufs else FLAGS.vae_sampledir_celeba
+  if aeType == 1:
+    print ("======> Samples generated from VAE model")
+    path = FLAGS.vae_sampledir_cufs if cufs else FLAGS.vae_sampledir_celeba
 
   imgs = []
   print (path)
@@ -325,6 +330,53 @@ def gifGenerate_AEs(aeType=0, cufs=True):
     imgs.append(imageio.imread(path + '/' + filename))
 
   imageio.mimsave(path + '/samples.gif', imgs)
+
+
+
+
+'''
+  plot curver between iteration times and loss or accuracy
+  - Input iteration: the iteration times of training
+  - Iuput loss: loss value during the training process
+  - Input accuracy: prediction accuracy during the training process
+'''
+def processPlot_loss_VAEs(path, iteration, loss_ML, loss_KL):
+  fig, (Ax0, Ax1) = plt.subplots(2, 1, figsize = (8, 20))
+
+  x = np.arange(0, iteration, 1)
+
+  Ax0.plot(x, loss_ML)
+  Ax0.set_title('Marginal Likelihood vs Iterations') 
+  # Ax0.set_xlabel('iteration times')
+  Ax0.set_ylabel('ML value')
+  Ax0.grid(True)
+
+  Ax1.plot(x, loss_KL)
+  Ax1.set_title('KL Divergence vs Iterations')
+  Ax1.set_xlabel('iteration times')
+  Ax1.set_ylabel('KL value')
+  Ax1.grid(True)
+
+  plt.show()
+  fig.savefig(path + '/loss_curve.png')   # save the figure to file
+  plt.close(fig)    # close the figure
+
+
+
+'''
+  plot accuracy and loss curve wrt the iteration times
+'''
+def processPlot_VAEs(cufs=True):
+  path = FLAGS.vae_curve_cufs if cufs else FLAGS.vae_curve_celeba
+
+  # load loss arraies
+  loss_ML = np.load(path + '/loss_ML.npy')
+  loss_KL = np.load(path + '/loss_KL.npy')
+
+  total = loss_ML.shape[0]
+
+  processPlot_loss_VAEs(path, total, loss_ML, loss_KL)
+
 
 
 
@@ -338,9 +390,6 @@ if __name__ == "__main__":
   # processPlot_GANs(ganType=1, cufs=False)
   # gifGenerate_GANs(ganType=1, cufs=False)
 
-  processPlot_AEs(cufs=False)
-  gifGenerate_AEs(aeType=0, cufs=False)
-
-
-
-
+  # processPlot_AEs(cufs=False)
+  # processPlot_VAEs(cufs=True)
+  gifGenerate_AEs(aeType=1, cufs=True)

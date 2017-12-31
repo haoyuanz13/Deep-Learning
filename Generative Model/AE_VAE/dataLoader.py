@@ -10,11 +10,18 @@ import skimage.io as io
 
 
 '''
-  normalize into [-1, 1]
+  normalize into [-1, 1] or [0, 1]
 '''
-def normData(arr):
+def normData(arr, twoSides=True):
   max_x, min_x = np.max(arr), np.min(arr)
-  arr = 2 * ((arr - min_x) / (max_x - min_x)) - 1
+
+  # normalize to [-1, 1]
+  if twoSides:
+    arr = 2 * ((arr - min_x) / (max_x - min_x)) - 1
+  # normalize to [0, 1]
+  else:
+    arr = (arr - min_x) / (max_x - min_x)
+
   return arr
 
 
@@ -41,7 +48,7 @@ def dataProcess_cufs(readTest=False):
       img = mpimg.imread(image_path)
 
       # normalize
-      img = normData(img)
+      img = normData(img, twoSides=False)
       # expand dimension to make it as shape [img_height, img_width, 1]
       img = np.expand_dims(img, axis=2)
 

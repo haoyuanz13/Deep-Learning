@@ -40,6 +40,16 @@ flags.DEFINE_string("vae_curve_cufs", 'vae_res/cufs_curve', "Directory to save c
 flags.DEFINE_string("vae_curve_celeba", 'vae_res/celeba_curve', "Directory to save celeba loss curve (vae)")
 FLAGS = flags.FLAGS
 
+'''
+  Add noise
+'''
+def addNoise(x):
+  x = x * np.random.randint(2, size=x.shape)
+  x += np.random.randint(2, size=x.shape)
+
+  return x
+
+
 
 def merge(images, size):
   h, w, c = images.shape[1], images.shape[2], images.shape[-1]
@@ -391,5 +401,9 @@ if __name__ == "__main__":
   # gifGenerate_GANs(ganType=1, cufs=False)
 
   # processPlot_AEs(cufs=False)
-  # processPlot_VAEs(cufs=True)
+  processPlot_VAEs(cufs=True)
   gifGenerate_AEs(aeType=1, cufs=True)
+
+
+
+

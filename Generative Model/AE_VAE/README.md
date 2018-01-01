@@ -23,10 +23,18 @@ celebA dataset
 VAE (Variational AutoEncoder)
 -------------
 
-CUFS dataset
+CUFS dataset (Raw Data)
 <p >
 <align="left">
   <img src = "./vae_res/cufs_curve/loss_curve.png?raw=true" width="400" height="400">
 <align="right">
   <img src = "./vae_res/cufs_samples/samples.gif?raw=true" width="350" height="350">
+</p>
+
+CUFS dataset (Add Noise)
+<p >
+<align="left">
+  <img src = "./vae_res/cufs_curve/loss_curve_noise.png?raw=true" width="400" height="400">
+<align="right">
+  <img src = "./vae_res/cufs_samples/samples_noise.gif?raw=true" width="350" height="350">
 </p>

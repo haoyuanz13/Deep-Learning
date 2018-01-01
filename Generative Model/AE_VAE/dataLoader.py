@@ -99,14 +99,14 @@ def dataProcess_celeba():
     im_cur = im_cur.astype(np.float32)
 
     # normalize data
-    im_cur = normData(im_cur)
+    im_cur = normData(im_cur, twoSides=False)
     im_cur = np.expand_dims(im_cur, axis=2)
     imgs.append(im_cur)
 
     count += 1
     if count == 10000:
       print '======> saving the {} file set..................'.format(file_ind)
-      np.save(('data/celeba/numpyData/imgSet_{}.npy'.format(file_ind)), imgs)
+      np.save(('data/celeba/numpyData/imgSet1_{}.npy'.format(file_ind)), imgs)
       file_ind += 1
       count = 0
       imgs[:] = []
@@ -115,17 +115,20 @@ def dataProcess_celeba():
 '''
   data loader for celeba faces
 '''
-def dataloader_celeba(ind):
+def dataloader_celeba(ind, twoSides=True):
   print "======================== Celeba Dataset ========================"
   print ('>>>>>>>>>>> load training data set {} .................'.format(ind))
-  path = ("data/celeba/numpyData/imgSet_{}.npy".format(ind))
-  imgs = np.load(path)
-  
+  if twoSides:
+    path = ("data/celeba/numpyData/imgSet_{}.npy".format(ind))
+  else:
+    path = ("data/celeba/numpyData/imgSet1_{}.npy".format(ind))
+
+  imgs = np.load(path)  
   return imgs
 
 
 if __name__ == '__main__':
   # dataloader_cufs()
   # dataProcess_celeba()
-  dataloader_celeba(3)
+  dataloader_celeba(3, twoSides=False)
 

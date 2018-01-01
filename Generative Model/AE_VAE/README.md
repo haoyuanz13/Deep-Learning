@@ -32,15 +32,15 @@ CUFS dataset (Raw Data)
 </p>
 
 CUFS dataset (Added Noise)
-[Left: Original Image; Center: Distributed Image; Right: Reconstructed Image via VAE]
 <p >
 <align="left">
-  <img src = "./vae_res/cufs_samples/test_ori.png?raw=true" width="250" height="250">
+  <img src = "./vae_res/cufs_samples/test_ori.png?raw=true" width="300" height="300">
 <align="center">
-  <img src = "./vae_res/cufs_samples/test_input.png?raw=true" width="250" height="250">
+  <img src = "./vae_res/cufs_samples/test_input.png?raw=true" width="300" height="300">
 <align="right">
-  <img src = "./vae_res/cufs_samples/reconstruct.png?raw=true" width="250" height="250">
+  <img src = "./vae_res/cufs_samples/reconstruct.png?raw=true" width="300" height="300">
 </p>
+[Left: Original Image; Center: Distributed Image; Right: Reconstructed Image via VAE]
 
 <p >
 <align="left">

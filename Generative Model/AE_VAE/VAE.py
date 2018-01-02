@@ -28,10 +28,10 @@ flags.DEFINE_integer("batch_size", 100, "The size of batch images [128]")
 flags.DEFINE_integer("sample_size", 32, "The size of sample images [32]")
 flags.DEFINE_integer("out_channel", 1, "The channel number of data [1]")
 flags.DEFINE_integer("max_iterations", 10001, "The max iteration times [1e6]")
-flags.DEFINE_integer("interval_plot", 1, "The epoch interval to plot training loss [1000]")
+flags.DEFINE_integer("interval_plot", 10, "The epoch interval to plot training loss [1000]")
 flags.DEFINE_integer("interval_save", 100, "The epoch interval to save generative images [1000]")
 flags.DEFINE_boolean("debug", False, "True if debug mode")
-flags.DEFINE_boolean("addNoise", False, "True if adding noise to the raw data")
+flags.DEFINE_boolean("addNoise", True, "True if adding noise to the raw data")
 FLAGS = flags.FLAGS
 
 
@@ -39,18 +39,23 @@ FLAGS = flags.FLAGS
 #############
 # VAE model #
 #############
-def VAE(x_hat, x, reuse=False, is_train=True):
+def VAE(x_hat, x, cufs=True, reuse=False, is_train=True):
   with tf.variable_scope('VAE', reuse=reuse) as vae:
     with tf.variable_scope('VAE_feed', reuse=reuse):
       # generate mu and std via encoding
-      mu, std = encoder_VAE(x_hat, reuse=reuse, training=is_train)
+      if cufs:
+        mu, std = encoder_VAE(x_hat, reuse=reuse, training=is_train)
+      else:
+        mu, std = encoder_largerVAE(x_hat, reuse=reuse, training=is_train)
 
       # sample mu and std to get code z
       z = mu + std * tf.random_normal(tf.shape(mu), 0, 1, dtype=tf.float32)
 
       # decoding
-      f_z = decoder_VAE(z, reuse=reuse, training=is_train)
-
+      if cufs:
+        f_z = decoder_VAE(z, reuse=reuse, training=is_train)
+      else:
+        f_z = decoder_largerVAE(z, reuse=reuse, training=is_train)
 
   # marginal likelihood (negative value)
   marginal_likelihood = tf.reduce_mean(tf.reduce_sum(
@@ -59,6 +64,8 @@ def VAE(x_hat, x, reuse=False, is_train=True):
   # KL divergence (positive value)
   KL_divergence = tf.reduce_mean(0.5 * tf.reduce_sum(
                   tf.square(mu) + tf.square(std) - tf.log(tf.square(std)) - 1, 1))
+
+  KL_divergence *= 0.01
 
   # equal weight comb loss    
   comb_loss = KL_divergence - marginal_likelihood
@@ -81,13 +88,13 @@ def VAE_main(dataset_train, dataset_test, cufs=True):
 
 
   # VAE feed forward
-  f_z, comb_loss, ml_train, kl_train, var_vae = VAE(x_hat, x, reuse=False, is_train=True)
+  f_z, comb_loss, ml_train, kl_train, var_vae = VAE(x_hat, x, cufs, reuse=False, is_train=True)
 
   # sample generation
-  f_z_samples, _, _, _, _ = VAE(x_hat, x, reuse=True, is_train=False)  
+  f_z_samples, _, _, _, _ = VAE(x_hat, x, cufs, reuse=True, is_train=False)  
   
   # VAE trainer 
-  lr_vae = .01  #.0002
+  lr_vae = .001
   global_step = tf.Variable(0, name='global_step', trainable=False)
   vae_trainer = tf.train.AdamOptimizer(lr_vae, beta1=.5).minimize(comb_loss, global_step=global_step, var_list=var_vae)
 
@@ -119,6 +126,7 @@ def VAE_main(dataset_train, dataset_test, cufs=True):
     data_epoch = dataset_train[arr[:], :, :, :]
 
     total_step = FLAGS.total_num / FLAGS.batch_size
+    # total_step = 1
 
     train_comb_loss, train_ML_loss, train_KL_div = 0, 0, 0
     for step in range(total_step):

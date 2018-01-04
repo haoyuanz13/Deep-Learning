@@ -1,11 +1,12 @@
 # from __future__ import division
-from __future__ import print_function
+# from __future__ import print_function
 import math
 import numpy as np
 import os, pdb
 import scipy.misc
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
+from six.moves import xrange
 
 from functools import partial
 
@@ -17,11 +18,11 @@ from model import *
   - including generator, discriminator, model construction, train and test operations.
 '''
 class img2img(object):
-  def __init__(self, sess, im_h=256, im_w=256, im_c_x=1, im_c_y=3,
-               batch_size=1, sample_size=1, max_iteration=10000, 
+  def __init__(self, sess, train_sketches, train_photos, test_sketches, test_photos, 
                interval_plot, interval_save, curve_dir, sampler_dir, 
-               G_f_dim=64, D_f_dim=64, L1_lambda=10,
-               train_sketches, train_photos, test_sketches, test_photos):
+               im_h=256, im_w=256, im_c_x=1, im_c_y=3,
+               batch_size=1, sample_size=1, max_iteration=10000, 
+               G_f_dim=64, D_f_dim=64, L1_lambda=10):
     '''
     Args:
       sess: tensorflow session
@@ -58,7 +59,6 @@ class img2img(object):
 
     # build model
     self.build_model()
-
 
 
   '''
@@ -122,6 +122,7 @@ class img2img(object):
       # 8th conv: Conv+Bn+lrelu || [N, im_h/128, im_w/128, 8*g_dim1]->[N, im_h/256, im_w/256, 8*g_dim1]
       e8 = conv_bn_lrelu(e7, self.g_dim1*8, 5, 2)  # e8 has size [N, 1, 1, 8*g_dim1]
 
+
       '''
         Decoder section using U-Net structure
       '''
@@ -161,7 +162,7 @@ class img2img(object):
       # d7 has shape [N, 128, 128, 2*g_dim1]
 
       # 8th deconv: Deconv+tanh
-      d8 = tf.nn.tanh(deconv(d7, self.im_c_pht, 5, 2))
+      d8 = tf.nn.tanh(dconv(d7, self.im_c_pht, 5, 2))
       # d8 has shape [N, 256, 256, im_c_pht]
 
       return d8
@@ -171,7 +172,7 @@ class img2img(object):
     - Input img: image data concatanated between sketch data and photos(real or fake) 
     - Output logit: the scalar to represent the prob that net belongs to the real data
   '''
-  def discriminator(img, reuse=True, training=True):
+  def discriminator(self, img, reuse=True, training=True):
     # batch normalize layer
     batch_norm = partial(slim.batch_norm, decay=0.9, scale=True, epsilon=1e-5, updates_collections=None)
     bn = partial(batch_norm, is_training=training)
@@ -188,7 +189,7 @@ class img2img(object):
 
     # model D
     with tf.variable_scope('Model_D', reuse=reuse):
-      # 1st conv+lrelu: [N, 256, 256, im_c_skt + im_c_pht]->[N, 128, 128, im_c_skt + im_c_pht] 
+      # 1st conv+lrelu: [N, 256, 256, im_c_skt + im_c_pht]->[N, 128, 128, d_dim1] 
       y1 = lrelu(conv(img, self.d_dim1, 5, 2))
 
       # 2nd conv+bn+lrelu: [N, 128, 128, d_dim1]->[N, 64, 64, d_dim1*2]
@@ -202,6 +203,7 @@ class img2img(object):
 
       # fc: [N, 16*16*d_dim1*8] -> [N, 1]
       logit = fc(y4, 1)
+
       return tf.nn.sigmoid(logit), logit
 
 
@@ -225,8 +227,8 @@ class img2img(object):
     self.sktAndreal_pht = tf.concat([self.img_skt, self.img_pht], 3)
     self.sktAndfake_pht = tf.concat([self.img_skt, self.fake_pht], 3)
 
-    self.prob_real_sig, self.prob_real_logits = self.discriminator(self.sktAndreal_pht, reuse=False, training=True)
-    self.prob_fake_sig, self.prob_fake_logits = self.discriminator(self.sktAndfake_pht, reuse=True, training=True)
+    self.prob_real_sig, self.prob_real_logits = self.discriminator(self.sktAndreal_pht, reuse=False)
+    self.prob_fake_sig, self.prob_fake_logits = self.discriminator(self.sktAndfake_pht, reuse=True)
 
     # sample data
     self.fake_samplers_skt = self.generator(self.img_sampler, reuse=True, training=False)
@@ -260,7 +262,7 @@ class img2img(object):
     # define saver
     self.saver = tf.train.Saver()
 
-    print "The model has been well initialized!"
+    print "\n>>>>>>>> The model has been well initialized! \n"
     return
 
   '''
@@ -288,11 +290,11 @@ class img2img(object):
 
     # save original and input data
     save_path = self.sampler_dir
-    scipy.misc.imsave(save_path + '/original_input.png', x_ipt_sample_target)
-    scipy.misc.imsave(save_path + '/actual_input.png', x_ipt_sample_input)
+    scipy.misc.imsave(save_path + '/original_input.png', x_ipt_sample_target[0, :, :, 0])
+    scipy.misc.imsave(save_path + '/actual_input.png', x_ipt_sample_input[0, :, :, 0])
 
     # Outer training loop (control epoch)
-    for epoch in range(2 if FLAGS.debug else int(self.max_epoch)): 
+    for epoch in xrange(2 if FLAGS.debug else int(self.max_epoch)): 
       # data x random shuffle 
       arr = np.arange(FLAGS.total_num)
       np.random.shuffle(arr)
@@ -300,11 +302,12 @@ class img2img(object):
       skt_epoch = self.train_skt[arr[:], :, :, :]
       pht_epoch = self.train_pht[arr[:], :, :, :]
 
-      total_step = FLAGS.total_num / self.batch_size
+      # total_step = FLAGS.total_num / self.batch_size
+      total_step = 5
       
       # inner training loop (control step)
       train_d_loss, train_g_loss = 0, 0
-      for step in range(total_step):
+      for step in xrange(0, total_step):
         skt_batch = skt_epoch[step * self.batch_size : (step + 1) * self.batch_size]
         pht_batch = pht_epoch[step * self.batch_size : (step + 1) * self.batch_size]
 
@@ -347,12 +350,11 @@ class img2img(object):
         print ('\n===========> Generate sample images and saving ................................. \n')
         if self.sampler_dir:
           samples = self.sample_size
-          images = self.sess.run(self.img_sampler, feed_dict=feed_dict_train)
+          images = self.sess.run(self.fake_samplers_skt, feed_dict=feed_dict_train)
 
           images = images[:samples, :, :, :]
-          images = np.reshape(images, [samples, 64, 64, self.im_c_pht])
           images = (images + 1.) / 2.
 
-          scipy.misc.imsave(save_path + ('/sample_{}.png'.format(epoch)), images)
+          scipy.misc.imsave(save_path + ('/sample_{}.png'.format(epoch)), images[0, :, :, :])
           np.save(self.curve_dir + '/loss_d.npy', d_loss_set[:epoch + 1])
           np.save(self.curve_dir + '/loss_g.npy', g_loss_set[:epoch + 1])

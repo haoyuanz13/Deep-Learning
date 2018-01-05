@@ -8,9 +8,6 @@ import tensorflow as tf
 from utils import *
 from dataLoader import *
 from img2img import img2img
-
-from utils import *
-from dataLoader import *
 from model import *
 
 

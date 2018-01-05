@@ -7,6 +7,7 @@ import scipy.misc
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from six.moves import xrange
+import time
 
 from functools import partial
 
@@ -20,7 +21,7 @@ from model import *
 class img2img(object):
   def __init__(self, sess, train_sketches, train_photos, test_sketches, test_photos, 
                interval_plot, interval_save, curve_dir, sampler_dir, 
-               im_h=256, im_w=256, im_c_x=1, im_c_y=3,
+               im_h=256, im_w=256, im_c_x=3, im_c_y=3,
                batch_size=1, sample_size=1, max_iteration=10000, 
                G_f_dim=64, D_f_dim=64, L1_lambda=10):
     '''
@@ -201,11 +202,37 @@ class img2img(object):
       # 4th conv+bn+lrelu: [N, 32, 32, d_dim1*4]->[N, 16, 16, d_dim1*8]
       y4 = conv_bn_lrelu(y3, self.d_dim1 * 8, 5, 2)
 
-      # fc: [N, 16*16*d_dim1*8] -> [N, 1]
-      logit = fc(y4, 1)
+      # 5th conv+bn+lrelu: [N, 16, 16, d_dim1*4]->[N, 8, 8, d_dim1*8]
+      y5 = conv_bn_lrelu(y4, self.d_dim1 * 8, 5, 2)
+
+      # 5th conv+bn+lrelu: [N, 8, 8, d_dim1*4]->[N, 4, 4, 1]
+      y6 = conv_bn_lrelu(y5, 1, 5, 2)
+
+      # fc: [N, 4*4*1] -> [N,1]
+      logit = fc(y6, 1)
 
       return tf.nn.sigmoid(logit), logit
 
+
+  '''
+    load sample images randomly
+  '''
+  def load_random_samples(self, FLAGS):
+    # random shuffle test dataset
+    total_test = self.test_skt.shape[0]
+    arr = np.arange(total_test)
+    np.random.shuffle(arr)
+
+    test_skt_sample = self.test_skt[arr[:], :, :, :]
+    test_pht_sample = self.test_pht[arr[:], :, :, :]
+
+    # test data for reconstruction
+    x_ipt_sample = test_skt_sample[:self.batch_size, :, :, :]
+    x_ipt_sample_input = addNoise(x_ipt_sample) if FLAGS.addNoise else x_ipt_sample
+
+    x_ipt_sample_target = test_pht_sample[:self.batch_size, :, :, :]
+
+    return x_ipt_sample_input, x_ipt_sample_target
 
 
   '''
@@ -231,7 +258,7 @@ class img2img(object):
     self.prob_fake_sig, self.prob_fake_logits = self.discriminator(self.sktAndfake_pht, reuse=True)
 
     # sample data
-    self.fake_samplers_skt = self.generator(self.img_sampler, reuse=True, training=False)
+    self.fake_samplers_skt = self.generator(self.img_sampler, reuse=True, training=True)
 
     '''
       loss computation
@@ -270,9 +297,8 @@ class img2img(object):
   '''
   def train(self, FLAGS):
     # optimizer for model D
-    global_step = tf.Variable(0, name='global_step', trainable=False)
     d_trainer = tf.train.AdamOptimizer(FLAGS.lr_modelD, beta1=FLAGS.beta1).minimize(
-        self.d_loss, global_step=global_step, var_list=self.model_D_vars)
+        self.d_loss, var_list=self.model_D_vars)
 
     # optimizer for model G
     g_trainer = tf.train.AdamOptimizer(FLAGS.lr_modelG, beta1=FLAGS.beta1).minimize(
@@ -283,18 +309,9 @@ class img2img(object):
 
     d_loss_set,  g_loss_set = np.zeros([int(self.max_epoch)]), np.zeros([int(self.max_epoch)])
 
-    # test data for reconstruction
-    x_ipt_sample = self.test_skt[:self.batch_size, :, :, :]
-    x_ipt_sample_target = x_ipt_sample
-    x_ipt_sample_input = addNoise(x_ipt_sample) if FLAGS.addNoise else x_ipt_sample
-
-    # save original and input data
-    save_path = self.sampler_dir
-    scipy.misc.imsave(save_path + '/original_input.png', x_ipt_sample_target[0, :, :, 0])
-    scipy.misc.imsave(save_path + '/actual_input.png', x_ipt_sample_input[0, :, :, 0])
-
     # Outer training loop (control epoch)
     for epoch in xrange(2 if FLAGS.debug else int(self.max_epoch)): 
+      print '\n<===================== The {}th Epoch training is processing =====================>'.format(epoch)
       # data x random shuffle 
       arr = np.arange(FLAGS.total_num)
       np.random.shuffle(arr)
@@ -302,18 +319,21 @@ class img2img(object):
       skt_epoch = self.train_skt[arr[:], :, :, :]
       pht_epoch = self.train_pht[arr[:], :, :, :]
 
-      # total_step = FLAGS.total_num / self.batch_size
-      total_step = 5
-      
+      total_step = FLAGS.total_num / self.batch_size
+
+      # obtain random sample data
+      sample_skts_epoch, sample_phts_epoch = self.load_random_samples(FLAGS)
+
       # inner training loop (control step)
       train_d_loss, train_g_loss = 0, 0
+      start_time = time.time()
       for step in xrange(0, total_step):
         skt_batch = skt_epoch[step * self.batch_size : (step + 1) * self.batch_size]
         pht_batch = pht_epoch[step * self.batch_size : (step + 1) * self.batch_size]
 
         skt_input = addNoise(skt_batch) if FLAGS.addNoise else skt_batch  # add noise if necessary
 
-        feed_dict_train = {self.img_skt:skt_input, self.img_pht:pht_batch, self.img_sampler:x_ipt_sample_input}
+        feed_dict_train = {self.img_skt:skt_input, self.img_pht:pht_batch, self.img_sampler:sample_skts_epoch}
         
         # update D model
         self.sess.run(d_trainer, feed_dict=feed_dict_train)
@@ -326,6 +346,9 @@ class img2img(object):
         d_loss_batch = self.d_loss.eval(feed_dict=feed_dict_train)
         g_loss_batch = self.g_loss.eval(feed_dict=feed_dict_train)
 
+        print ('Epoch: [{}] [{:02d}/{}] || Time: {:.4f}s || D Loss: {:.8f} || G Loss: {:.8f}'.format(
+          epoch, step, total_step, time.time() - start_time, d_loss_batch, g_loss_batch))
+
         # update loss sum
         train_d_loss += d_loss_batch
         train_g_loss += g_loss_batch
@@ -337,8 +360,9 @@ class img2img(object):
 
       # Log details
       if epoch % self.intval_plot == 0:
-        print ('====> The {}th training epoch || Model D Loss {:.8f} || Model G Loss: {:.8f}'.format(
-          epoch, train_d_loss/total_step, train_g_loss/total_step))
+        print '\n-------------------------------------------------------------------------------------------------------------------------------'
+        print ('The {}th training epoch completed || Total time cost {:.4f}s || Model D Avg Loss {:.8f} || Model G Avg Loss: {:.8f}'.format(
+          epoch, time.time() - start_time, train_d_loss/total_step, train_g_loss/total_step))
 
       # Early stopping
       if np.isnan(train_d_loss) or np.isnan(train_g_loss):
@@ -347,14 +371,31 @@ class img2img(object):
 
       # plot generative images
       if epoch % self.intval_save == 0:
-        print ('\n===========> Generate sample images and saving ................................. \n')
+        print ('\n===========> Generate sample images and saving .................................')
         if self.sampler_dir:
           samples = self.sample_size
-          images = self.sess.run(self.fake_samplers_skt, feed_dict=feed_dict_train)
 
-          images = images[:samples, :, :, :]
-          images = (images + 1.) / 2.
+          # execute sampler
+          images, im_d_loss, im_g_loss = \
+                  self.sess.run([self.fake_samplers_skt, self.d_loss, self.g_loss], feed_dict=feed_dict_train)
 
-          scipy.misc.imsave(save_path + ('/sample_{}.png'.format(epoch)), images[0, :, :, :])
+          print("[Sample Loss] Model D Loss: {:.8f} || Model G Loss: {:.8f}".format(im_d_loss, im_g_loss))
+
+          images = images[:samples, :, :, :]  # obtain certain number of images
+          images = (images + 1.) / 2.  # image recover
+
+          # concat images
+          im_concat = np.zeros([self.im_h, 3 * self.im_w, self.im_c_pht])
+          im_concat[:, :self.im_w, :] = sample_skts_epoch[0, :, :, :]
+          im_concat[:, self.im_w:2*self.im_w, :] = images[0, :, :, :]
+          im_concat[:, 2*self.im_w:, :] = sample_phts_epoch[0, :, :, :]
+
+          scipy.misc.imsave(self.sampler_dir + ('/sample_{:04d}.png'.format(epoch)), im_concat)
+          
+          # save loss curve
           np.save(self.curve_dir + '/loss_d.npy', d_loss_set[:epoch + 1])
           np.save(self.curve_dir + '/loss_g.npy', g_loss_set[:epoch + 1])
+
+          
+          
+

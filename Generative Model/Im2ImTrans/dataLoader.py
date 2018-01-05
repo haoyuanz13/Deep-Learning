@@ -198,7 +198,7 @@ def connectData(is_train=True):
 
   # store data
   total = len(data_all)
-  save_path = "dataset/cufs_std/train" if is_train else "dataset/cufs_std/test"
+  save_path = "data/cufs_std_concat/train" if is_train else "data/cufs_std_concat/test"
   for i in xrange(total):
     scipy.misc.imsave(save_path + ('/{}.jpg'.format(i+1)), data_all[i])
 

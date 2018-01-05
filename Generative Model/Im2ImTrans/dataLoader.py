@@ -6,7 +6,16 @@ import numpy as np
 import matplotlib.image as mpimg
 import pdb
 from PIL import Image
+import scipy.misc
 import skimage.io as io 
+
+################
+# Define flags #
+################
+flags = tf.app.flags
+flags.DEFINE_integer("fine_height", 256, "The target height of resized image [256]")
+flags.DEFINE_integer("fine_width", 256, "The target width of resized image [256]")
+FLAGS = flags.FLAGS
 
 
 '''
@@ -23,108 +32,6 @@ def normData(arr, twoSides=True):
     arr = (arr - min_x) / (max_x - min_x)
 
   return arr
-
-
-'''
-  dataloader
-'''
-def dataProcess_cufs(readTest=False):
-  dict_cur = {'img': [], 'order': []}
-  
-  # obtain data path (test or train)
-  if readTest:
-    print '>>>>>>>>>>> load testing data .................'
-    path = 'data/cufs/devkit/test.txt'
-  else:
-    print '>>>>>>>>>>> load training data .................'
-    path = 'data/cufs/devkit/train.txt'
-  
-  with open(path) as f:
-    for line in f:
-      file_info = line.split()
-      file_name = file_info[0]
-
-      image_path = 'data/cufs/imgs/' + file_name
-      img = mpimg.imread(image_path)
-
-      # normalize
-      img = normData(img, twoSides=False)
-      # expand dimension to make it as shape [img_height, img_width, 1]
-      img = np.expand_dims(img, axis=2)
-
-      # image data
-      dict_cur['img'].append(img)
-
-      # img label
-      dict_cur['order'].append(int(file_info[1]))
-
-  
-  dict_cur['img'] = np.array(dict_cur['img'])
-  dict_cur['order'] = np.array(dict_cur['order'])
-
-  return dict_cur
-
-
-'''
-  load cufs data
-'''
-def dataloader_cufs():
-  print "======================== CUFS Dataset ========================"
-  # load cufs data
-  train_dict_cufs = dataProcess_cufs()
-  test_dict_cufs = dataProcess_cufs(True)
-
-  train_imgs_cufs, train_ind_cufs = train_dict_cufs['img'], train_dict_cufs['order']
-  test_imgs_cufs, test_ind_cufs = test_dict_cufs['img'], test_dict_cufs['order']
-
-  return train_imgs_cufs, train_ind_cufs, test_imgs_cufs, test_ind_cufs
-
-
-'''
-  data process for celeba faces
-'''
-def dataProcess_celeba():
-  imgs = []
-  path = "data/celeba/imgs"
-  valid_images = [".jpg",".gif",".png",".tga"]
-  
-  count, file_ind = 0, 0
-  for f in os.listdir(path):
-    ext = os.path.splitext(f)[1]
-    if ext.lower() not in valid_images:
-        continue
-    
-    # im_cur = np.array(Image.open(os.path.join(path, f))).astype(np.float32)
-    im_cur = io.imread(os.path.join(path, f))
-    im_cur = im_cur.astype(np.float32)
-
-    # normalize data
-    im_cur = normData(im_cur, twoSides=False)
-    im_cur = np.expand_dims(im_cur, axis=2)
-    imgs.append(im_cur)
-
-    count += 1
-    if count == 10000:
-      print '======> saving the {} file set..................'.format(file_ind)
-      np.save(('data/celeba/numpyData/imgSet1_{}.npy'.format(file_ind)), imgs)
-      file_ind += 1
-      count = 0
-      imgs[:] = []
-
-
-'''
-  data loader for celeba faces
-'''
-def dataloader_celeba(ind, twoSides=True):
-  print "======================== Celeba Dataset ========================"
-  print ('>>>>>>>>>>> load training data set {} .................'.format(ind))
-  if twoSides:
-    path = ("data/celeba/numpyData/imgSet_{}.npy".format(ind))
-  else:
-    path = ("data/celeba/numpyData/imgSet1_{}.npy".format(ind))
-
-  imgs = np.load(path)  
-  return imgs
 
 
 '''
@@ -154,14 +61,23 @@ def dataProcess_cufs_students():
       im_cur = io.imread(os.path.join(path_cur, f))
       im_cur = im_cur.astype(np.float32)
 
+      # resize
+      im_cur = scipy.misc.imresize(im_cur, [FLAGS.fine_height, FLAGS.fine_width])
+
       # normalize data
-      im_cur = normData(im_cur, twoSides=True)
+      # im_cur = normData(im_cur, twoSides=True)
+      im_cur = im_cur / 127.5 - 1
+
+      im_cur_3c = np.zeros([FLAGS.fine_height, FLAGS.fine_width, 3]).astype(np.float32)
+      if len(im_cur.shape) != 3:
+        im_cur_3c[:, :, 0] = im_cur
+        im_cur_3c[:, :, 1] = im_cur
+        im_cur_3c[:, :, 2] = im_cur
       
-      if len(im_cur.shape) == 3:
-        im_cur = im_cur[:, :, 0]
-      
-      im_cur = np.expand_dims(im_cur, axis=2)
-      imgs.append(im_cur)
+      else:
+        im_cur_3c = im_cur
+
+      imgs.append(im_cur_3c)
 
     # store data
     print '======> saving the [' + file_name + '] file set..................'
@@ -181,9 +97,12 @@ def dataProcess_cufs_students():
       # im_cur = np.array(Image.open(os.path.join(path, f))).astype(np.float32)
       im_cur = io.imread(os.path.join(path_cur, f))
       im_cur = im_cur.astype(np.float32)
+      im_cur = scipy.misc.imresize(im_cur, [FLAGS.fine_height, FLAGS.fine_width])
 
       # normalize data
-      im_cur = normData(im_cur, twoSides=True)
+      # im_cur = normData(im_cur, twoSides=True)
+      im_cur = im_cur / 127.5 - 1
+
       imgs.append(im_cur)
 
     # store data
@@ -216,11 +135,78 @@ def dataloader_cufs_students():
   return sketches_dict, photos_dict
 
 
-if __name__ == '__main__':
-  # dataloader_cufs()
-  # dataProcess_celeba()
-  # dataloader_celeba(3, twoSides=False)
+'''
+  Change the data format: left part is photo and right part is sketch
+'''
+def connectData(is_train=True):
+  # imgs = []
+  path = "data/cufs_students/"
 
+  if is_train:
+    folder_name =["photos_train", "sketches_train"]
+  
+  else:
+    folder_name =["photos_test", "sketches_test"]
+
+  valid_images = [".jpg",".gif",".png",".tga"]
+  
+
+  data_all = []
+  # pre-process training data
+  for file_name in folder_name:
+    print "The current folder is [" + file_name + "]"
+    path_cur = path + file_name + "/"
+
+    count = 0
+    # read in images
+    for f in sorted(os.listdir(path_cur)):
+      ext = os.path.splitext(f)[1]
+      if ext.lower() not in valid_images:
+          continue
+
+      im_cur = io.imread(os.path.join(path_cur, f))
+      im_cur = im_cur.astype(np.float32)
+
+      # resize
+      im_cur = scipy.misc.imresize(im_cur, [FLAGS.fine_height, FLAGS.fine_width])
+
+      # normalize data
+      # im_cur = normData(im_cur, twoSides=True)
+      # im_cur = im_cur / 127.5 - 1
+
+      im_cur_3c = np.zeros([FLAGS.fine_height, FLAGS.fine_width, 3]).astype(np.float32)
+      if len(im_cur.shape) != 3:
+        im_cur_3c[:, :, 0] = im_cur
+        im_cur_3c[:, :, 1] = im_cur
+        im_cur_3c[:, :, 2] = im_cur
+      
+      else:
+        im_cur_3c = im_cur
+
+
+      if file_name == "photos_train" or file_name == "photos_test":
+        im_concat = np.zeros([FLAGS.fine_height, 2 * FLAGS.fine_width, 3])
+        im_concat[:, 0:FLAGS.fine_width, :] = im_cur_3c
+        data_all.append(im_concat)
+
+      else:
+        im_concat = data_all[count]
+        im_concat[:, FLAGS.fine_width:, :] = im_cur_3c
+        data_all[count] = im_concat
+
+        count += 1
+
+  # store data
+  total = len(data_all)
+  save_path = "dataset/cufs_std/train" if is_train else "dataset/cufs_std/test"
+  for i in xrange(total):
+    scipy.misc.imsave(save_path + ('/{}.jpg'.format(i+1)), data_all[i])
+
+
+
+
+if __name__ == '__main__':
+  connectData(is_train=False)
   # dataProcess_cufs_students()
-  dataloader_cufs_students()
+  # dataloader_cufs_students()
 

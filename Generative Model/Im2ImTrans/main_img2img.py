@@ -4,6 +4,7 @@ import numpy as np
 import os, pdb
 import scipy.misc
 import tensorflow as tf
+import argparse
 
 from utils import *
 from dataLoader import *
@@ -36,15 +37,16 @@ flags.DEFINE_integer("interval_plot", 1, "The epoch interval to plot training lo
 flags.DEFINE_integer("interval_save", 10, "The epoch interval to save generative images [1000]")
 flags.DEFINE_integer("dim_first_modelG", 64, "The filter number of first conv layer in model G")
 flags.DEFINE_integer("dim_first_modelD", 64, "The filter number of first deconv layer in model D")
-flags.DEFINE_float("L1_loss_weight", 100, "The relative weight for L1 loss")
+flags.DEFINE_float("L1_loss_weight", 10, "The relative weight for L1 loss")
 flags.DEFINE_float("lr_modelG", 0.0002, "The learning rate for model G")
 flags.DEFINE_float("lr_modelD", 0.0002, "The learning rate for model D")
+flags.DEFINE_integer("n_critic_D", 4, "The training iterations of model D [4]")
+flags.DEFINE_integer("n_critic_G", 2, "The training iterations of model G [2]")
 flags.DEFINE_float("beta1", 0.5, "The momentum term of Adam optimizer")
 flags.DEFINE_boolean("addNoise", False, "True if adding noise to the raw data")
 flags.DEFINE_boolean("debug", False, "True if debug mode")
 flags.DEFINE_boolean("curveShow", False, "True if show loss curves")
 FLAGS = flags.FLAGS
-
 
 
 ########

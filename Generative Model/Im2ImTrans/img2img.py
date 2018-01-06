@@ -335,19 +335,20 @@ class img2img(object):
 
         feed_dict_train = {self.img_skt:skt_input, self.img_pht:pht_batch, self.img_sampler:sample_skts_epoch}
         
-        # update D model
-        self.sess.run(d_trainer, feed_dict=feed_dict_train)
+        # train model D for n_critic_D times first
+        for t in xrange(0, FLAGS.n_critic_D):
+         self.sess.run(d_trainer, feed_dict=feed_dict_train)
 
-        # update G model
-        self.sess.run(g_trainer, feed_dict=feed_dict_train)
-        self.sess.run(g_trainer, feed_dict=feed_dict_train)  # one more G training to avoid overflow problem
+        # train model G for n_critic_G times later
+        for t in xrange(0, FLAGS.n_critic_G):
+          self.sess.run(g_trainer, feed_dict=feed_dict_train)
 
         # evaluate loss
         d_loss_batch = self.d_loss.eval(feed_dict=feed_dict_train)
         g_loss_batch = self.g_loss.eval(feed_dict=feed_dict_train)
 
         print ('Epoch: [{}] [{:02d}/{}] || Time: {:.4f}s || D Loss: {:.8f} || G Loss: {:.8f}'.format(
-          epoch, step, total_step, time.time() - start_time, d_loss_batch, g_loss_batch))
+          epoch, step + 1, total_step, time.time() - start_time, d_loss_batch, g_loss_batch))
 
         # update loss sum
         train_d_loss += d_loss_batch
@@ -397,5 +398,3 @@ class img2img(object):
           np.save(self.curve_dir + '/loss_g.npy', g_loss_set[:epoch + 1])
 
           
-          
-

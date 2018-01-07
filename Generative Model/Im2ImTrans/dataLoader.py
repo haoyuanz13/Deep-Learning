@@ -25,7 +25,6 @@ FLAGS = flags.FLAGS
 '''
 def normData(arr, twoSides=True):
   max_x, min_x = np.max(arr), np.min(arr)
-
   # normalize to [-1, 1]
   if twoSides:
     arr = 2 * ((arr - min_x) / (max_x - min_x)) - 1
@@ -37,7 +36,7 @@ def normData(arr, twoSides=True):
 
 
 '''
-  random crop back training data and data augmentation
+  random crop back training data and data agumentation
 '''
 def randomCrop(img, flip=True):
   img = scipy.misc.imresize(img, [FLAGS.load_height, FLAGS.load_width])
@@ -51,6 +50,30 @@ def randomCrop(img, flip=True):
     img = np.fliplr(img)
 
   return img
+
+
+'''
+  image load: include random crop, norm and flip
+'''
+def imload(path):
+  im_cur = scipy.misc.imread(path)
+  im_cur = randomCrop(im_cur, flip=True)
+
+  im_cur = im_cur.astype(np.float32)
+  # normalize data
+  im_cur = im_cur / 127.5 - 1
+
+  im_cur_3c = np.zeros([1, FLAGS.fine_height, FLAGS.fine_width, 3]).astype(np.float32)
+  
+  if len(im_cur.shape) != 3:
+    im_cur_3c[0, :, :, 0] = im_cur
+    im_cur_3c[0, :, :, 1] = im_cur
+    im_cur_3c[0, :, :, 2] = im_cur
+  
+  else:
+    im_cur_3c[0, :, :, :] = im_cur
+
+  return im_cur_3c
 
 
 '''

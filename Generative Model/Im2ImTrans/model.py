@@ -13,17 +13,21 @@ from utils import *
 
 
 # leaky relu function
+# def lrelu(x, leak=0.2, name="lrelu"):
+#   with tf.variable_scope(name):
+#     f1 = 0.5 * (1 + leak)
+#     f2 = 0.5 * (1 - leak)
+#     return f1 * x + f2 * abs(x)
+
+
 def lrelu(x, leak=0.2, name="lrelu"):
-  with tf.variable_scope(name):
-    f1 = 0.5 * (1 + leak)
-    f2 = 0.5 * (1 - leak)
-    return f1 * x + f2 * abs(x)
+  return tf.maximum(x, leak * x)
 
 
 # fully connected layer
-def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
+def linear(input_, output_size, name=None, stddev=0.02, bias_start=0.0, with_w=False):
   shape = input_.get_shape().as_list()
-  with tf.variable_scope(scope or "Linear"):
+  with tf.variable_scope(name or "Linear"):
     matrix = tf.get_variable("Matrix", [shape[1], output_size], tf.float32,
                  tf.random_normal_initializer(stddev=stddev))
     bias = tf.get_variable("bias", [output_size],
@@ -45,6 +49,7 @@ def conv2d(input_, output_dim, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="co
     conv = tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape())
 
     return conv
+
 
 
 # deconvolution
@@ -78,9 +83,16 @@ def deconv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,
 '''
   batch normalization class
 '''
-def batch_norm(x, momentum, epsilon, name, train=True):
-  return tf.contrib.layers.batch_norm(x, decay=momentum, updates_collections=None,
-                      epsilon=epsilon, scale=True, is_training=train, scope=name)
+class batch_norm(object):
+  def __init__(self, epsilon=1e-5, momentum = 0.9, name="batch_norm"):
+    with tf.variable_scope(name):
+      self.epsilon = epsilon
+      self.momentum = momentum
+      self.name = name
+
+  def __call__(self, x, train=True):
+    return tf.contrib.layers.batch_norm(x, decay=self.momentum, updates_collections=None, 
+      epsilon=self.epsilon, scale=True, scope=self.name)
 
 
 
@@ -105,6 +117,7 @@ def leak_relu(x, leak, scope=None):
   with tf.name_scope(scope, 'leak_relu', [x, leak]):
     y = tf.maximum(x, leak * x) if leak < 1 else tf.minimum(x, leak * x)
     return y
+
 
 
 '''

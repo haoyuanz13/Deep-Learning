@@ -15,6 +15,8 @@ import skimage.io as io
 flags = tf.app.flags
 flags.DEFINE_integer("fine_height", 256, "The target height of resized image [256]")
 flags.DEFINE_integer("fine_width", 256, "The target width of resized image [256]")
+flags.DEFINE_integer("load_height", 286, "The load height of training image [286]")
+flags.DEFINE_integer("load_width", 286, "The load width of training image [286]")
 FLAGS = flags.FLAGS
 
 
@@ -35,6 +37,23 @@ def normData(arr, twoSides=True):
 
 
 '''
+  random crop back training data and data agumentation
+'''
+def randomCrop(img, flip=True):
+  img = scipy.misc.imresize(img, [FLAGS.load_height, FLAGS.load_width])
+
+  h1 = int(np.ceil(np.random.uniform(1e-2, FLAGS.load_height - FLAGS.fine_height)))
+  w1 = int(np.ceil(np.random.uniform(1e-2, FLAGS.load_width - FLAGS.fine_width)))
+
+  img = img[h1 : h1+FLAGS.fine_height, w1 : w1+FLAGS.fine_width]
+
+  if flip and np.random.random() > 0.5:
+    img = np.fliplr(img)
+
+  return img
+
+
+'''
   data process for cufs_students faces
 '''
 def dataProcess_cufs_students():
@@ -49,6 +68,7 @@ def dataProcess_cufs_students():
   # pre-process sketches data
   for file_name in folder_name_sketch:
     path_cur = path + file_name + "/"
+    is_train = (file_name == "sketches_train")
 
     # read in images
     imgs = []
@@ -59,11 +79,18 @@ def dataProcess_cufs_students():
       
       # im_cur = np.array(Image.open(os.path.join(path, f))).astype(np.float32)
       im_cur = io.imread(os.path.join(path_cur, f))
+
+      '''
+        resize test data but random crop training data
+      '''
+      if is_train:
+        im_cur = randomCrop(im_cur, flip=True)
+      
+      else:
+        # resize
+        im_cur = scipy.misc.imresize(im_cur, [FLAGS.fine_height, FLAGS.fine_width])
+
       im_cur = im_cur.astype(np.float32)
-
-      # resize
-      im_cur = scipy.misc.imresize(im_cur, [FLAGS.fine_height, FLAGS.fine_width])
-
       # normalize data
       # im_cur = normData(im_cur, twoSides=True)
       im_cur = im_cur / 127.5 - 1
@@ -83,9 +110,11 @@ def dataProcess_cufs_students():
     print '======> saving the [' + file_name + '] file set..................'
     np.save(('data/cufs_students/numpyData/' + file_name + '.npy'), imgs)
 
+
   # pre-process photo data
   for file_name in folder_name_photo:
     path_cur = path + file_name + "/"
+    is_train = (file_name == "photos_train")
 
     # read in images
     imgs = []
@@ -96,9 +125,13 @@ def dataProcess_cufs_students():
       
       # im_cur = np.array(Image.open(os.path.join(path, f))).astype(np.float32)
       im_cur = io.imread(os.path.join(path_cur, f))
-      im_cur = im_cur.astype(np.float32)
-      im_cur = scipy.misc.imresize(im_cur, [FLAGS.fine_height, FLAGS.fine_width])
 
+      if is_train:
+        im_cur = randomCrop(im_cur, flip=True)
+      else:
+        im_cur = scipy.misc.imresize(im_cur, [FLAGS.fine_height, FLAGS.fine_width])
+
+      im_cur = im_cur.astype(np.float32)
       # normalize data
       # im_cur = normData(im_cur, twoSides=True)
       im_cur = im_cur / 127.5 - 1
@@ -206,7 +239,7 @@ def connectData(is_train=True):
 
 
 if __name__ == '__main__':
-  connectData(is_train=False)
-  # dataProcess_cufs_students()
+  # connectData(is_train=False)
+  dataProcess_cufs_students()
   # dataloader_cufs_students()
 

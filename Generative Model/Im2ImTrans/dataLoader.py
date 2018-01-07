@@ -37,7 +37,7 @@ def normData(arr, twoSides=True):
 
 
 '''
-  random crop back training data and data agumentation
+  random crop back training data and data augmentation
 '''
 def randomCrop(img, flip=True):
   img = scipy.misc.imresize(img, [FLAGS.load_height, FLAGS.load_width])

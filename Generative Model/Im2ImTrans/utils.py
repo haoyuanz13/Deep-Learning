@@ -141,8 +141,3 @@ def gifGenerate_GANs():
 
 if __name__ == "__main__":
   processPlot_GANs()
-
-
-
-
-

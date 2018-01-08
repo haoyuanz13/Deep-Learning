@@ -1,5 +1,9 @@
 Image to Image translation with Conditional Adversarial Networks
 ===========================
 
-## Created two models: img2img and img2img_x.        
+## Package Clarification
+### Data
+### Models
 1. img2img_x
+### Other Files
+

@@ -166,23 +166,34 @@ def dataProcess_cufs_students():
   data loader for cufs_students faces
 '''
 def dataloader_cufs_students():
-  print "======================== CUFS Studenst Dataset ========================"
+  print "\n========== CUFS Studenst Dataset (.npy files) =========="
   base_path = "data/cufs_students/numpyData/"
-  file_name = ["sketches_train", "sketches_test", "photos_train", "photos_test"]
+  file_name = ["sketches_train", "sketches_test", "sketches_val", "photos_train", "photos_test", "photos_val"]
 
-  sketches_dict, photos_dict = {'train': [], 'test': []}, {'train': [], 'test': []}
+  sketches_dict, photos_dict = \
+          {'train': [], 'test': [], 'val': []}, {'train': [], 'test': [], 'val': []}
 
-  print '>>>>>>>>>>> load [' + file_name[0] + '] dataset .................'
+  print '===>> loading [' + file_name[0] + '] dataset .......'
   sketches_dict['train'] = np.load(base_path + file_name[0] + ".npy")
 
-  print '>>>>>>>>>>> load [' + file_name[1] + '] dataset .................'
-  sketches_dict['test'] = np.load(base_path + file_name[1] + ".npy")
+  
+  skt_test = np.load(base_path + file_name[1] + ".npy")
+  print '===>> loading [' + file_name[1] + '] dataset .......'
+  sketches_dict['test'] = skt_test[:50, :, :, :]
+  
+  print '===>> loading [' + file_name[2] + '] dataset .......'
+  sketches_dict['val'] = skt_test[50:, :, :, :]
 
-  print '>>>>>>>>>>> load [' + file_name[2] + '] dataset .................'
-  photos_dict['train'] = np.load(base_path + file_name[2] + ".npy")
 
-  print '>>>>>>>>>>> load [' + file_name[3] + '] dataset .................'
-  photos_dict['test'] = np.load(base_path + file_name[3] + ".npy")
+  print '===>> loading [' + file_name[3] + '] dataset .......'
+  photos_dict['train'] = np.load(base_path + file_name[3] + ".npy")
+
+  pht_test = np.load(base_path + file_name[4] + ".npy")
+  print '===>> loading [' + file_name[4] + '] dataset .......'
+  photos_dict['test'] = pht_test[:50, :, :, :]
+  
+  print '===>> loading [' + file_name[5] + '] dataset .......'
+  photos_dict['val'] = pht_test[50:, :, :, :]
 
   return sketches_dict, photos_dict
 

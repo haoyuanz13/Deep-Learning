@@ -1,4 +1,4 @@
-# from __future__ import division
+from __future__ import division
 # from __future__ import print_function
 import math
 import numpy as np
@@ -16,78 +16,64 @@ from utils import *
 from model import *
 from dataLoader import *
 
-'''
-  The image to image translation class
-  - including generator, discriminator, model construction, train and test operations.
-'''
+
 class img2img(object):
-  def __init__(self, sess, train_sketches, train_photos, test_sketches, test_photos, 
-               interval_plot, interval_save, curve_dir, sampler_dir, 
-               im_h=256, im_w=256, im_c_x=3, im_c_y=3,
-               batch_size=1, sample_size=1, max_iteration=10000, 
-               G_f_dim=64, D_f_dim=64, L1_lambda=10):
-    '''
+  def __init__(self, sess, im_height=256, im_width=256, batch_size=1, sample_size=1, output_size=256,
+               gf_dim=64, df_dim=64, L1_lambda=100, input_c_dim=3, output_c_dim=3, dataset_name='cufs_std_concat',
+               checkpoint_dir=None, sample_dir=None):
+    """
     Args:
-      sess: tensorflow session
-      im_h, im_w: the size of images (height and width)
-      im_c_x: the channel number of input sketches data
-      im_c_y: the channel number of input photoes data
-      batch_size: the number of training data of each batch
-      sample_size: the number of sample data
-      max_iteration: the total number of epoches
-      interval_plot: the epoch interval for each training loss plot
-      interval_save: the epoch interval for sample generation and curve saving
-      curve_dir: the directory to store loss curve
-      sampler_dir: the directory to store samples
-      G_f_dim: the dimension of model G filters in 1st conv layer
-      D_f_dim: the dimension of model D filters in 1st conv layer
-      L1_lambda: the weight of L1 loss for G loss
-      train(test)_sketches: the sketches dataset for training(test)
-      train(test)_photos: the photos dataset for training(test)
-    '''
+      sess: TensorFlow session
+      batch_size: The size of batch. Should be specified before training.
+      output_size: (optional) The resolution in pixels of the images. [256]
+      gf_dim: (optional) Dimension of gen filters in first conv layer. [64]
+      df_dim: (optional) Dimension of discrim filters in first conv layer. [64]
+      input_c_dim: (optional) Dimension of input image color. For grayscale input, set to 1. [3]
+      output_c_dim: (optional) Dimension of output image color. For grayscale input, set to 1. [3]
+    """
     self.sess = sess
-    self.im_h, self.im_w = im_h, im_w
-    self.im_c_skt, self.im_c_pht = im_c_x, im_c_y
-    self.batch_size, self.sample_size = batch_size, sample_size
-    self.max_epoch = max_iteration
+    self.is_grayscale = (input_c_dim == 1)
+    self.batch_size = batch_size
+    self.im_h = im_height
+    self.im_w = im_width
+    self.sample_size = sample_size
+    self.output_size = output_size
 
-    self.intval_plot, self.intval_save = interval_plot, interval_save
-    self.curve_dir, self.sampler_dir = curve_dir, sampler_dir
+    self.gf_dim = gf_dim
+    self.df_dim = df_dim
 
-    self.g_dim1, self.d_dim1 = G_f_dim, D_f_dim
+    self.input_c_dim = input_c_dim
+    self.output_c_dim = output_c_dim
+
     self.L1_lambda = L1_lambda
 
-    self.train_skt, self.train_pht = train_sketches, train_photos
-    self.test_skt, self.test_pht = test_sketches, test_photos
+    # batch normalization : deals with poor initialization helps gradient flow
+    self.d_bn1 = batch_norm(name='d_bn1')
+    self.d_bn2 = batch_norm(name='d_bn2')
+    self.d_bn3 = batch_norm(name='d_bn3')
+    self.d_bn4 = batch_norm(name='d_bn4')
+    self.d_bn5 = batch_norm(name='d_bn5')
+    self.d_bn6 = batch_norm(name='d_bn6')
+    self.d_bn7 = batch_norm(name='d_bn7')
 
-    '''
-      define batch_norm layers to deal with poor initialization
-    '''
-    # BN layers in generator
-    self.BN_2_GE = batch_norm(name='bn_2_ge')
-    self.BN_3_GE = batch_norm(name='bn_3_ge')
-    self.BN_4_GE = batch_norm(name='bn_4_ge')
-    self.BN_5_GE = batch_norm(name='bn_5_ge')
-    self.BN_6_GE = batch_norm(name='bn_6_ge')
-    self.BN_7_GE = batch_norm(name='bn_7_ge')
-    self.BN_8_GE = batch_norm(name='bn_8_ge')
+    self.g_bn_e2 = batch_norm(name='g_bn_e2')
+    self.g_bn_e3 = batch_norm(name='g_bn_e3')
+    self.g_bn_e4 = batch_norm(name='g_bn_e4')
+    self.g_bn_e5 = batch_norm(name='g_bn_e5')
+    self.g_bn_e6 = batch_norm(name='g_bn_e6')
+    self.g_bn_e7 = batch_norm(name='g_bn_e7')
+    self.g_bn_e8 = batch_norm(name='g_bn_e8')
 
-    self.BN_1_GD = batch_norm(name='bn_1_gd')
-    self.BN_2_GD = batch_norm(name='bn_2_gd')
-    self.BN_3_GD = batch_norm(name='bn_3_gd')
-    self.BN_4_GD = batch_norm(name='bn_4_gd')
-    self.BN_5_GD = batch_norm(name='bn_5_gd')
-    self.BN_6_GD = batch_norm(name='bn_6_gd')
-    self.BN_7_GD = batch_norm(name='bn_7_gd')
+    self.g_bn_d1 = batch_norm(name='g_bn_d1')
+    self.g_bn_d2 = batch_norm(name='g_bn_d2')
+    self.g_bn_d3 = batch_norm(name='g_bn_d3')
+    self.g_bn_d4 = batch_norm(name='g_bn_d4')
+    self.g_bn_d5 = batch_norm(name='g_bn_d5')
+    self.g_bn_d6 = batch_norm(name='g_bn_d6')
+    self.g_bn_d7 = batch_norm(name='g_bn_d7')
 
-    # BN layers in discriminator
-    self.BN_2_D = batch_norm(name='bn_2_d')
-    self.BN_3_D = batch_norm(name='bn_3_d')
-    self.BN_4_D = batch_norm(name='bn_4_d')
-    self.BN_5_D = batch_norm(name='bn_5_d')
-    self.BN_6_D = batch_norm(name='bn_6_d')
-
-    # build model
+    self.dataset_name = dataset_name
+    self.checkpoint_dir = checkpoint_dir
     self.build_model()
 
 
@@ -97,86 +83,91 @@ class img2img(object):
     - Input reuse: represent whether reuse the generator
     - Input training: represent whether feed forward in training approach
   '''
-  def generator(self, img, reuse=False):
-    with tf.variable_scope('Model_G', reuse=reuse):
+  def generator(self, image, reuse=False):
+    with tf.variable_scope("generator") as scope:
+
+      if reuse:
+        tf.get_variable_scope().reuse_variables()
+      else:
+        assert tf.get_variable_scope().reuse == False
+
+
       '''
         Encoder section
       '''
-      # 1st conv: Conv+lrelu || [N, im_h, im_w, 1]->[N, im_h/2, im_w/2, g_dim1]
-      e1 = lrelu(conv2d(img, self.g_dim1, name='g_conv_1'))
-
-      # 2nd conv: Conv+Bn+lrelu || [N, im_h/2, im_w/2, g_dim1]->[N, im_h/4, im_w/4, 2*g_dim1]
-      e2 = lrelu(self.BN_2_GE(conv2d(e1, self.g_dim1*2, name='g_conv_2')))
-
-      # 3rd conv: Conv+Bn+lrelu || [N, im_h/4, im_w/4, 2*g_dim1]->[N, im_h/8, im_w/8, 4*g_dim1]
-      e3 = lrelu(self.BN_3_GE(conv2d(e2, self.g_dim1*4, name='g_conv_3')))
-
-      # 4th conv: Conv+Bn+lrelu || [N, im_h/8, im_w/8, 4*g_dim1]->[N, im_h/16, im_w/16, 8*g_dim1]
-      e4 = lrelu(self.BN_4_GE(conv2d(e3, self.g_dim1*8, name='g_conv_4')))
-
-      # 5th conv: Conv+Bn+lrelu || [N, im_h/16, im_w/16, 8*g_dim1]->[N, im_h/32, im_w/32, 8*g_dim1]
-      e5 = lrelu(self.BN_5_GE(conv2d(e4, self.g_dim1*8, name='g_conv_5')))
-     
-      # 6th conv: Conv+Bn+lrelu || [N, im_h/32, im_w/32, 8*g_dim1]->[N, im_h/64, im_w/64, 8*g_dim1]
-      e6 = lrelu(self.BN_6_GE(conv2d(e5, self.g_dim1*8, name='g_conv_6')))
-           
-      # 7th conv: Conv+Bn+lrelu || [N, im_h/64, im_w/64, 8*g_dim1]->[N, im_h/128, im_w/128, 8*g_dim1]
-      e7 = lrelu(self.BN_7_GE(conv2d(e6, self.g_dim1*8, name='g_conv_7')))
-
-      # 8th conv: Conv+Bn+lrelu || [N, im_h/128, im_w/128, 8*g_dim1]->[N, im_h/256, im_w/256, 8*g_dim1]
-      e8 = lrelu(self.BN_8_GE(conv2d(e7, self.g_dim1*8, name='g_conv_8')))
+      # image is (N x 256 x 256 x input_c_dim)
+      e1 = conv2d(image, self.gf_dim, name='g_e1_conv')
+      # e1 is (N x 128 x 128 x self.gf_dim)
+      e2 = self.g_bn_e2(conv2d(lrelu(e1), self.gf_dim*2, name='g_e2_conv'))
+      # e2 is (N x 64 x 64 x self.gf_dim*2)
+      e3 = self.g_bn_e3(conv2d(lrelu(e2), self.gf_dim*4, name='g_e3_conv'))
+      # e3 is (N x 32 x 32 x self.gf_dim*4)
+      e4 = self.g_bn_e4(conv2d(lrelu(e3), self.gf_dim*8, name='g_e4_conv'))
+      # e4 is (N x 16 x 16 x self.gf_dim*8)
+      e5 = self.g_bn_e5(conv2d(lrelu(e4), self.gf_dim*8, name='g_e5_conv'))
+      # e5 is (N x 8 x 8 x self.gf_dim*8)
+      e6 = self.g_bn_e6(conv2d(lrelu(e5), self.gf_dim*8, name='g_e6_conv'))
+      # e6 is (N x 4 x 4 x self.gf_dim*8)
+      e7 = self.g_bn_e7(conv2d(lrelu(e6), self.gf_dim*8, name='g_e7_conv'))
+      # e7 is (N x 2 x 2 x self.gf_dim*8)
+      e8 = self.g_bn_e8(conv2d(lrelu(e7), self.gf_dim*8, name='g_e8_conv'))
+      # e8 is (N x 1 x 1 x self.gf_dim*8)
 
 
       '''
         Decoder section using U-Net structure
       '''
-      # 1st deconv: Deconv+Bn+dropout+relu
-      d1 = deconv2d(e8, [self.batch_size, 2, 2, self.g_dim1*8], name="g_deconv_1")
-      d1 = tf.nn.dropout(self.BN_1_GD(d1), 0.5)
-      d1 = tf.nn.relu(tf.concat([d1, e7], 3))  # skip connection d1-e7
-      # d1 has shape [N, 2, 2, 2*8*g_dim1]
+      # define output size
+      s = self.output_size
+      s2, s4, s8, s16, s32, s64, s128 = int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), int(s/64), int(s/128)
 
-      # 2nd deconv: Deconv+Bn+dropout+relu
-      d2 = deconv2d(d1, [self.batch_size, 4, 4, self.g_dim1*8], name="g_deconv_2")
-      d2 = tf.nn.dropout(self.BN_2_GD(d2), 0.5)
-      d2 = tf.nn.relu(tf.concat([d2, e6], 3))  # skip connection d2-e6
-      # d2 has shape [N, 4, 4, 2*8*g_dim1]
+      self.d1, self.d1_w, self.d1_b = deconv2d(tf.nn.relu(e8), 
+          [self.batch_size, s128, s128, self.gf_dim*8], name='g_d1', with_w=True)
+      d1 = tf.nn.dropout(self.g_bn_d1(self.d1), 0.5)
+      d1 = tf.concat([d1, e7], 3)
+      # d1 is (N x 2 x 2 x self.gf_dim*8*2)
 
-      # 3rd deconv: Deconv+Bn+dropout+relu
-      d3 = deconv2d(d2, [self.batch_size, 8, 8, self.g_dim1*8], name="g_deconv_3")
-      d3 = tf.nn.dropout(self.BN_3_GD(d3), 0.5)
-      d3 = tf.nn.relu(tf.concat([d3, e5], 3))  # skip connection d3-e5
-      # d3 has shape [N, 8, 8, 2*8*g_dim1]
+      self.d2, self.d2_w, self.d2_b = deconv2d(tf.nn.relu(d1),
+          [self.batch_size, s64, s64, self.gf_dim*8], name='g_d2', with_w=True)
+      d2 = tf.nn.dropout(self.g_bn_d2(self.d2), 0.5)
+      d2 = tf.concat([d2, e6], 3)
+      # d2 is (N x 4 x 4 x self.gf_dim*8*2)
 
-      # 4th deconv: Deconv+Bn+dropout+relu
-      d4 = deconv2d(d3, [self.batch_size, 16, 16, self.g_dim1*8], name="g_deconv_4")
-      d4 = tf.nn.dropout(self.BN_4_GD(d4), 0.5)
-      d4 = tf.nn.relu(tf.concat([d4, e4], 3))  # skip connection d4-e4
-      # d4 has shape [N, 16, 16, 2*8*g_dim1]
+      self.d3, self.d3_w, self.d3_b = deconv2d(tf.nn.relu(d2),
+          [self.batch_size, s32, s32, self.gf_dim*8], name='g_d3', with_w=True)
+      d3 = tf.nn.dropout(self.g_bn_d3(self.d3), 0.5)
+      d3 = tf.concat([d3, e5], 3)
+      # d3 is (N x 8 x 8 x self.gf_dim*8*2)
 
-      # 5th deconv: Deconv+Bn+dropout+relu
-      d5 = deconv2d(d4, [self.batch_size, 32, 32, self.g_dim1*4], name="g_deconv_5")
-      d5 = tf.nn.dropout(self.BN_5_GD(d5), 0.5)
-      d5 = tf.nn.relu(tf.concat([d5, e3], 3))  # skip connection d5-e3
-      # d5 has shape [N, 32, 32, 2*4*g_dim1]
+      self.d4, self.d4_w, self.d4_b = deconv2d(tf.nn.relu(d3),
+          [self.batch_size, s16, s16, self.gf_dim*8], name='g_d4', with_w=True)
+      d4 = self.g_bn_d4(self.d4)
+      d4 = tf.concat([d4, e4], 3)
+      # d4 is (N x 16 x 16 x self.gf_dim*8*2)
 
-      # 6th deconv: Deconv+Bn+dropout+relu
-      d6 = deconv2d(d5, [self.batch_size, 64, 64, self.g_dim1*2], name="g_deconv_6")
-      d6 = tf.nn.dropout(self.BN_6_GD(d6), 0.5)
-      d6 = tf.nn.relu(tf.concat([d6, e2], 3))  # skip connection d6-e2
-      # d6 has shape [N, 64, 64, 2*2*g_dim1]
+      self.d5, self.d5_w, self.d5_b = deconv2d(tf.nn.relu(d4),
+          [self.batch_size, s8, s8, self.gf_dim*4], name='g_d5', with_w=True)
+      d5 = self.g_bn_d5(self.d5)
+      d5 = tf.concat([d5, e3], 3)
+      # d5 is (N x 32 x 32 x self.gf_dim*4*2)
 
-      # 7th deconv: Deconv+Bn+dropout+relu
-      d7 = deconv2d(d6, [self.batch_size, 128, 128, self.g_dim1], name="g_deconv_7")
-      d7 = tf.nn.dropout(self.BN_7_GD(d7), 0.5)
-      d7 = tf.nn.relu(tf.concat([d7, e1], 3))  # skip connection d7-e1
-      # d7 has shape [N, 128, 128, 2*g_dim1]
+      self.d6, self.d6_w, self.d6_b = deconv2d(tf.nn.relu(d5),
+          [self.batch_size, s4, s4, self.gf_dim*2], name='g_d6', with_w=True)
+      d6 = self.g_bn_d6(self.d6)
+      d6 = tf.concat([d6, e2], 3)
+      # d6 is (N x 64 x 64 x self.gf_dim*2*2)
 
-      # 8th deconv: Deconv+tanh
-      d8 = tf.nn.tanh(deconv2d(d7, [self.batch_size, 256, 256, self.im_c_pht], name="g_deconv_8"))
-      # d8 has shape [N, 256, 256, im_c_pht]
+      self.d7, self.d7_w, self.d7_b = deconv2d(tf.nn.relu(d6),
+          [self.batch_size, s2, s2, self.gf_dim], name='g_d7', with_w=True)
+      d7 = self.g_bn_d7(self.d7)
+      d7 = tf.concat([d7, e1], 3)
+      # d7 is (N x 128 x 128 x self.gf_dim*1*2)
 
-      return d8
+      self.d8, self.d8_w, self.d8_b = deconv2d(tf.nn.relu(d7),
+          [self.batch_size, s, s, self.output_c_dim], name='g_d8', with_w=True)
+      # d8 is (N x 256 x 256 x output_c_dim)
+
+      return tf.nn.tanh(self.d8)
 
 
   '''
@@ -184,217 +175,328 @@ class img2img(object):
     - Input img: image data concatanated between sketch data and photos(real or fake) 
     - Output logit: the scalar to represent the prob that net belongs to the real data
   '''
-  def discriminator(self, img, reuse=True):
-    with tf.variable_scope('Model_D', reuse=reuse):
-      # 1st conv+lrelu: [N, 256, 256, im_c_skt + im_c_pht]->[N, 128, 128, d_dim1] 
-      y1 = lrelu(conv2d(img, self.d_dim1, name='d_conv_1'))
+  def discriminator(self, img, reuse=False):
+    with tf.variable_scope("discriminator") as scope:
+      # image is N x 256 x 256 x (input_c_dim + output_c_dim)
+      if reuse:
+        tf.get_variable_scope().reuse_variables()
+      else:
+        assert tf.get_variable_scope().reuse == False
+      
+      # 1st conv+lrelu: [N, 256, 256, im_c_skt + im_c_pht]->[N, 128, 128, df_dim] 
+      y1 = lrelu(conv2d(img, self.df_dim, name='d_conv_1'))
 
-      # 2nd conv+bn+lrelu: [N, 128, 128, d_dim1]->[N, 64, 64, d_dim1*2]
-      y2 = lrelu(self.BN_2_D(conv2d(y1, self.d_dim1*2, name='d_conv_2')))
+      # 2nd conv+bn+lrelu: [N, 128, 128, df_dim]->[N, 64, 64, df_dim*2]
+      y2 = lrelu(self.d_bn1(conv2d(y1, self.df_dim*2, name='d_conv_2')))
 
-      # 3rd conv+bn+lrelu: [N, 64, 64, d_dim1*2]->[N, 32, 32, d_dim1*4]
-      y3 = lrelu(self.BN_3_D(conv2d(y2, self.d_dim1*4, name='d_conv_3')))
+      # 3rd conv+bn+lrelu: [N, 64, 64, df_dim*2]->[N, 32, 32, df_dim*4]
+      y3 = lrelu(self.d_bn2(conv2d(y2, self.df_dim*4, name='d_conv_3')))
 
-      # 4th conv+bn+lrelu: [N, 32, 32, d_dim1*4]->[N, 16, 16, d_dim1*8]
-      y4 = lrelu(self.BN_4_D(conv2d(y3, self.d_dim1*8, name='d_conv_4')))
+      # 4th conv+bn+lrelu: [N, 32, 32, df_dim*4]->[N, 16, 16, df_dim*8]
+      y4 = lrelu(self.d_bn3(conv2d(y3, self.df_dim*8, name='d_conv_4')))
 
-      logit = linear(tf.reshape(y4, [self.batch_size, -1]), 1, name='d_fc')
+      # 5th conv+bn+lrelu: [N, 16, 16, df_dim*8]->[N, 8, 8, df_dim*8]
+      y5 = lrelu(self.d_bn4(conv2d(y4, self.df_dim*8, name='d_conv_5')))
 
-      # # 5th conv+bn+lrelu: [N, 16, 16, d_dim1*8]->[N, 8, 8, d_dim1*8]
-      # y5 = lrelu(self.BN_5_D(conv2d(y4, self.d_dim1*8, name='d_conv_5')))
+      # 6th conv+bn+lrelu: [N, 8, 8, df_dim*8]->[N, 4, 4, df_dim*8]
+      y6 = lrelu(self.d_bn5(conv2d(y5, self.df_dim*8, name='d_conv_6')))
 
-      # # 5th conv+bn+lrelu: [N, 8, 8, d_dim1*8]->[N, 4, 4, d_dim1*8]
-      # y6 = lrelu(self.BN_6_D(conv2d(y5, self.d_dim1*8, name='d_conv_6')))
+      # fc: [N, 4*4*1] -> [N,1]
+      logit = linear(tf.reshape(y5, [self.batch_size, -1]), 1, name='d_fc')
 
-      # # fc: [N, 4*4*1] -> [N,1]
-      # logit = linear(tf.reshape(y6, [self.batch_size, -1]), 1, name='d_fc')
-      # logit = fc(y6, 1)
+    # logit = fc(y6, 1)
 
-      return tf.nn.sigmoid(logit), logit
-
-
-  '''
-    load sample images randomly
-  '''
-  def load_random_samples(self, FLAGS):
-    # random shuffle test dataset
-    total_test = self.test_skt.shape[0]
-    arr = np.arange(total_test)
-    np.random.shuffle(arr)
-
-    test_skt_sample = self.test_skt[arr[:], :, :, :]
-    test_pht_sample = self.test_pht[arr[:], :, :, :]
-
-    # test data for reconstruction
-    x_ipt_sample = test_skt_sample[:self.batch_size, :, :, :]
-    x_ipt_sample_input = addNoise(x_ipt_sample) if FLAGS.addNoise else x_ipt_sample
-
-    x_ipt_sample_target = test_pht_sample[:self.batch_size, :, :, :]
-
-    return x_ipt_sample_input, x_ipt_sample_target
+    return tf.nn.sigmoid(logit), logit
 
 
   '''
-    Model Construction
-    - includes loss cpmputation
+    Model construction
   '''
   def build_model(self):
-    # tensor to store sketches and photos
-    self.img_skt = tf.placeholder(tf.float32, shape=[self.batch_size, self.im_h, self.im_w, self.im_c_skt], name='sketch_img')
-    self.img_pht = tf.placeholder(tf.float32, shape=[self.batch_size, self.im_h, self.im_w, self.im_c_pht], name='photo_img')
+    self.real_data = tf.placeholder(tf.float32, [self.batch_size, self.im_h, self.im_w, 
+                                                 self.input_c_dim + self.output_c_dim], name='real_A_and_B_images')
 
-    # test data for sampler
-    self.img_sampler = tf.placeholder(tf.float32, shape=[self.batch_size, self.im_h, self.im_w, self.im_c_skt], name='test_sketch_img')
+    # real_B represents the input photo(y)
+    self.real_B = self.real_data[:, :, :, :self.input_c_dim]
 
-    # generator to obtain fake_pht
-    self.fake_pht = self.generator(self.img_skt, reuse=False)
+    # real_A represents the input sketch(x)
+    self.real_A = self.real_data[:, :, :, self.input_c_dim:self.input_c_dim + self.output_c_dim]
 
-    # discriminators (skt + real_pht or fake_pht)
-    self.sktAndreal_pht = tf.concat([self.img_skt, self.img_pht], 3)
-    self.sktAndfake_pht = tf.concat([self.img_skt, self.fake_pht], 3)
+    # generate the fake photo (y)
+    self.fake_B = self.generator(self.real_A)
 
-    self.prob_real_sig, self.prob_real_logits = self.discriminator(self.sktAndreal_pht, reuse=False)
-    self.prob_fake_sig, self.prob_fake_logits = self.discriminator(self.sktAndfake_pht, reuse=True)
+    self.real_AB = tf.concat([self.real_A, self.real_B], 3)
+    self.fake_AB = tf.concat([self.real_A, self.fake_B], 3)
 
-    # sample data
-    self.fake_samplers_skt = self.generator(self.img_sampler, reuse=True)
+    self.D, self.D_logits = self.discriminator(self.real_AB, reuse=False)
+    self.D_, self.D_logits_ = self.discriminator(self.fake_AB, reuse=True)
 
-    '''
-      loss computation
-    '''
-    # D_loss = -log[D(skt,real_pht)] - log[1 - D(skt,fake_pht)]
-    self.d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
-                          labels=tf.ones_like(self.prob_real_sig), logits=self.prob_real_logits))
-    self.d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
-                          labels=tf.zeros_like(self.prob_fake_sig), logits=self.prob_fake_logits))
+    # generate the fake samples
+    self.fake_B_sample = self.generator(self.real_A, reuse=True)
+
+    self.d_sum = tf.summary.histogram("d", self.D)
+    self.d__sum = tf.summary.histogram("d_", self.D_)
+    self.fake_B_sum = tf.summary.image("fake_B", self.fake_B)
+
+    # d loss computation: D_loss = -log[D(skt,real_pht)] - log[1 - D(skt,fake_pht)]
+    self.d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits, labels=tf.ones_like(self.D)))
+    self.d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits_, labels=tf.zeros_like(self.D_)))
+        
+    self.d_loss_real_sum = tf.summary.scalar("d_loss_real", self.d_loss_real)
+    self.d_loss_fake_sum = tf.summary.scalar("d_loss_fake", self.d_loss_fake)
 
     self.d_loss = self.d_loss_real + self.d_loss_fake
+    self.d_loss_sum = tf.summary.scalar("d_loss", self.d_loss)
 
-    # G_loss = -log[D(skt,fake_pht)] + L1_loss(fake_pht, real_pht)
-    self.g_loss_adv = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
-                      labels=tf.ones_like(self.prob_fake_sig), logits=self.prob_fake_logits))
-    self.g_loss_l1 = tf.reduce_mean(tf.abs(self.img_pht - self.fake_pht))
-
+    # g loss computation: G_loss = -log[D(skt,fake_pht)] + L1_loss(fake_pht, real_pht)
+    self.g_loss_adv = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits_, labels=tf.ones_like(self.D_)))
+    self.g_loss_l1 = tf.reduce_mean(tf.abs(self.real_B - self.fake_B))
+    
     self.g_loss = self.g_loss_adv + self.L1_lambda * self.g_loss_l1
+    self.g_loss_sum = tf.summary.scalar("g_loss", self.g_loss)
+    
 
-    '''
-      Obtain variables
-    '''
-    model_vars = tf.trainable_variables()
-    self.model_D_vars = [v for v in model_vars if 'Model_D/' in v.name]
-    self.model_G_vars = [v for v in model_vars if 'Model_G/' in v.name]
+    t_vars = tf.trainable_variables()
 
-    # define saver
+    self.d_vars = [var for var in t_vars if 'd_' in var.name]
+    self.g_vars = [var for var in t_vars if 'g_' in var.name]
+
     self.saver = tf.train.Saver()
 
-    print "\n>>>>>>>> The [NEW] img2img model has been well initialized! \n"
-    return
+    print "\n[*] The model has been well initialized! \n"
+
 
   '''
     Main train code
   '''
-  def train(self, FLAGS):
-    # optimizer for model D
-    d_trainer = tf.train.AdamOptimizer(FLAGS.lr_modelD, beta1=FLAGS.beta1).minimize(
-        self.d_loss, var_list=self.model_D_vars)
+  def train(self, args):
+    """Train img2img"""
+    d_optim = tf.train.AdamOptimizer(args.lr_modelD, beta1=args.beta1).minimize(self.d_loss, var_list=self.d_vars)
+    g_optim = tf.train.AdamOptimizer(args.lr_modelG, beta1=args.beta1).minimize(self.g_loss, var_list=self.g_vars)
 
-    # optimizer for model G
-    g_trainer = tf.train.AdamOptimizer(FLAGS.lr_modelG, beta1=FLAGS.beta1).minimize(
-        self.g_loss, var_list=self.model_G_vars)
+    init_op = tf.global_variables_initializer()
+    self.sess.run(init_op)
 
-    # Session
-    self.sess.run(tf.global_variables_initializer())
+    # add summaries
+    self.g_sum = tf.summary.merge([self.d__sum, self.fake_B_sum, self.d_loss_fake_sum, self.g_loss_sum])
+    self.d_sum = tf.summary.merge([self.d_sum, self.d_loss_real_sum, self.d_loss_sum])
+    self.writer = tf.summary.FileWriter(args.log_dir, self.sess.graph)
 
-    d_loss_set,  g_loss_set = np.zeros([int(self.max_epoch)]), np.zeros([int(self.max_epoch)])
 
-    # load train data file names
-    data_skt_path = sorted(glob('./data/cufs_students/sketches_train/*.jpg'))
-    data_pht_path = sorted(glob('./data/cufs_students/photos_train/*.jpg'))
+    if self.load_checkpoint(self.checkpoint_dir):
+      print("[*] Checkepoint Load SUCCESS")
+    else:
+      print("[!] Checkpoint Load failed...")
 
-    # Outer training loop (control epoch)
-    for epoch in xrange(2 if FLAGS.debug else int(self.max_epoch)): 
+    d_loss_set,  g_loss_set = np.zeros([int(args.max_iteration)]), np.zeros([int(args.max_iteration)])
+    counter = 1  # count total training step [max_iteration x steps]
+    
+    # training loop
+    for epoch in xrange(2 if args.debug else int(args.max_iteration)):
       print '\n<===================== The {}th Epoch training is processing =====================>'.format(epoch)
-      # data random shuffle 
-      arr = np.arange(FLAGS.total_num)
-      np.random.shuffle(arr)
+      data = glob('./data/{}/train/*.jpg'.format(self.dataset_name))
+      np.random.shuffle(data)
+      batch_idxs = min(len(data), args.train_size) // self.batch_size
 
-      total_step = FLAGS.total_num / self.batch_size
-      # obtain random sample data
-      sample_skts_epoch, sample_phts_epoch = self.load_random_samples(FLAGS)
-
-      # inner training loop (control step)
       train_d_loss, train_g_loss = 0, 0
       start_time = time.time()
-      for step in xrange(0, total_step):
-        skt_batch = imload(data_skt_path[arr[step]])
-        pht_batch = imload(data_pht_path[arr[step]])
-
-        skt_input = addNoise(skt_batch) if FLAGS.addNoise else skt_batch  # add noise if necessary
-
-        feed_dict_train = {self.img_skt:skt_input, self.img_pht:pht_batch, self.img_sampler:sample_skts_epoch}
+      for idx in xrange(0, batch_idxs):
+        batch_files = data[idx * self.batch_size : (idx + 1) * self.batch_size]
+        batch = [load_data(batch_file) for batch_file in batch_files]
         
+        if (self.is_grayscale):
+          batch_images = np.array(batch).astype(np.float32)[:, :, :, None]
+        else:
+          batch_images = np.array(batch).astype(np.float32)
+
         # train model D for n_critic_D times first
-        for t in xrange(0, FLAGS.n_critic_D):
-         self.sess.run(d_trainer, feed_dict=feed_dict_train)
+        for t in xrange(0, args.n_critic_D):
+          _, summary_str = self.sess.run([d_optim, self.d_sum], feed_dict={ self.real_data: batch_images })
+          self.writer.add_summary(summary_str, counter)
 
         # train model G for n_critic_G times later
-        for t in xrange(0, FLAGS.n_critic_G):
-          self.sess.run(g_trainer, feed_dict=feed_dict_train)
+        for t in xrange(0, args.n_critic_G):
+          _, summary_str = self.sess.run([g_optim, self.g_sum], feed_dict={ self.real_data: batch_images })
+          self.writer.add_summary(summary_str, counter)
 
-        # evaluate loss
-        d_loss_batch = self.d_loss.eval(feed_dict=feed_dict_train)
-        g_loss_batch = self.g_loss.eval(feed_dict=feed_dict_train)
+          
+        errD_fake = self.d_loss_fake.eval({self.real_data: batch_images})
+        errD_real = self.d_loss_real.eval({self.real_data: batch_images})
+        errG = self.g_loss.eval({self.real_data: batch_images})
 
+        train_d_loss += errD_fake+errD_real
+        train_g_loss += errG
+
+        counter += 1
         print ('Epoch: [{}] [{:02d}/{}] || Time: {:.4f}s || D Loss: {:.8f} || G Loss: {:.8f}'.format(
-          epoch, step + 1, total_step, time.time() - start_time, d_loss_batch, g_loss_batch))
+          epoch, idx + 1, batch_idxs, time.time() - start_time, errD_fake+errD_real, errG))
 
-        # update loss sum
-        train_d_loss += d_loss_batch
-        train_g_loss += g_loss_batch
+      # save single epoch result
+      d_loss_set[epoch], g_loss_set[epoch] = train_d_loss/float(batch_idxs), train_g_loss/float(batch_idxs) 
 
-      # end inner loop
+      # sample and save model
+      if epoch % args.interval_sample == 0:
+        print ('\nGenerate fake samples ..............')
+        self.sample_model(args, args.sample_dir, epoch)
+        # save loss curve
+        np.save(args.curve_dir + '/loss_d.npy', d_loss_set[:epoch + 1])
+        np.save(args.curve_dir + '/loss_g.npy', g_loss_set[:epoch + 1])
 
-      # store training loss
-      d_loss_set[epoch], g_loss_set[epoch] = train_d_loss/total_step, train_g_loss/total_step
-
-      # Log details
-      if epoch % self.intval_plot == 0:
-        print '\n-------------------------------------------------------------------------------------------------------------------------------'
+      # save model
+      if epoch % args.interval_save == 0:
+        print ('\nSaving models ......................')
+        self.save_checkpoint(args.checkpoint_dir, epoch)
+      
+      # plot Avg loss
+      if epoch % args.interval_plot == 0:
+        print ('\n-------------------------------------------------------------------------------------------------------------------------------')
         print ('The {}th training epoch completed || Total time cost {:.4f}s || Model D Avg Loss {:.8f} || Model G Avg Loss: {:.8f}'.format(
-          epoch, time.time() - start_time, train_d_loss/total_step, train_g_loss/total_step))
+            epoch, time.time() - start_time, train_d_loss/float(batch_idxs), train_g_loss/float(batch_idxs)))
+      
 
-      # Early stopping
-      if np.isnan(train_d_loss) or np.isnan(train_g_loss):
-        print('Early stopping')
-        break
 
-      # plot generative images
-      if epoch % self.intval_save == 0:
-        print ('\n===========> Generate sample images and saving .................................')
-        if self.sampler_dir:
-          samples = self.sample_size
+  '''
+    Load random samples from val dataset
+  '''
+  def load_random_samples(self, random_load=True):
+    if random_load:
+      data = np.random.choice(glob('./data/{}/val/*.jpg'.format(self.dataset_name)), self.batch_size)
+      sample = [load_data(sample_file) for sample_file in data]
 
-          # execute sampler
-          images, im_d_loss, im_g_loss = \
-                  self.sess.run([self.fake_samplers_skt, self.d_loss, self.g_loss], feed_dict=feed_dict_train)
+    else:
+      data = sorted(glob('./data/{}/val/*.jpg'.format(self.dataset_name)))
+      sample = load_data(data[5], flip=False)
+      sample = np.expand_dims(sample, axis=0)  # shape [1, height, width, 6]
 
-          print("[Sample Loss] Model D Loss: {:.8f} || Model G Loss: {:.8f}".format(im_d_loss, im_g_loss))
 
-          images = images[:samples, :, :, :]  # obtain certain number of images
-          images = (images + 1.) / 2.  # image recover
+    if (self.is_grayscale):
+      sample_images = np.array(sample).astype(np.float32)[:, :, :, None]
+    else:
+      sample_images = np.array(sample).astype(np.float32)
 
-          # concat images
-          im_concat = np.zeros([self.im_h, 3 * self.im_w, self.im_c_pht])
-          im_concat[:, :self.im_w, :] = sample_skts_epoch[0, :, :, :]
-          im_concat[:, self.im_w:2*self.im_w, :] = images[0, :, :, :]
-          im_concat[:, 2*self.im_w:, :] = sample_phts_epoch[0, :, :, :]
+    return sample_images
 
-          scipy.misc.imsave(self.sampler_dir + ('/sample_{:04d}.png'.format(epoch)), im_concat)
+  '''
+    generate sample data
+  '''
+  def sample_model(self, args, sample_dir, epoch):
+    sample_images = self.load_random_samples(random_load=args.randomSample)
+    samples, d_loss, g_loss = self.sess.run(
+        [self.fake_B_sample, self.d_loss, self.g_loss], feed_dict={self.real_data: sample_images})
+    
+    samples = inverse_transform(samples)
+    pht = sample_images[:, :, :, :self.input_c_dim]
+    skt = sample_images[:, :, :, self.input_c_dim:self.input_c_dim + self.output_c_dim]
+
+    # save samples
+    self.save_samples(sample_dir, epoch, skt, samples, pht, concat=args.concatSamples)
+    print("======>> [Sample] d_loss: {:.8f}, g_loss: {:.8f}".format(d_loss, g_loss))
+
+
+  '''
+    save generated images
+  '''
+  def save_samples(self, sample_dir, epoch, skt, samples, pht, concat=True):
+    skt = merge(skt, [self.batch_size, 1])
+    samples = merge(samples, [self.batch_size, 1])
+    pht = merge(pht, [self.batch_size, 1])
+    
+    # concat three images into single one
+    if concat:
+      im_concat = np.zeros((self.output_size, 3 * self.output_size, self.output_c_dim)).astype(np.float32)
+      im_concat[:, :self.output_size, :] = skt
+      im_concat[:, self.output_size:2*self.output_size, :] = samples
+      im_concat[:, 2*self.output_size:, :] = pht
+
+      scipy.misc.imsave(sample_dir + ('/sample_{:04d}.png'.format(epoch)), im_concat) 
+
+    # save images separately
+    else:
+      scipy.misc.imsave(sample_dir + ('/sample_{:04d}.png'.format(epoch)), samples) 
+      scipy.misc.imsave(sample_dir + ('/sample_photo.png'), pht) 
+      scipy.misc.imsave(sample_dir + ('/sample_sketch.png'), skt) 
+
+
+  '''
+    save checkpoint for tensorboard
+  '''
+  def save_checkpoint(self, checkpoint_dir, step):
+    model_name = "img2img.model"
+    model_dir = "%s_%s_%s" % (self.dataset_name, self.batch_size, self.output_size)
+    checkpoint_dir = os.path.join(checkpoint_dir, model_dir)
+
+    if not os.path.exists(checkpoint_dir):
+      os.makedirs(checkpoint_dir)
+
+    self.saver.save(self.sess, os.path.join(checkpoint_dir, model_name), global_step=step)
+
+
+  '''
+    load checkpoint
+  '''
+  def load_checkpoint(self, checkpoint_dir):
+    print("====>> Reading checkpoint ...")
+
+    model_dir = "%s_%s_%s" % (self.dataset_name, self.batch_size, self.output_size)
+    checkpoint_dir = os.path.join(checkpoint_dir, model_dir)
+
+    ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
+    
+    if ckpt and ckpt.model_checkpoint_path:
+      ckpt_name = os.path.basename(ckpt.model_checkpoint_path)
+      self.saver.restore(self.sess, os.path.join(checkpoint_dir, ckpt_name))
+      return True
+
+    else:
+      return False
+
+
+  '''
+    test model
+  '''
+  def test(self, args):
+    init_op = tf.global_variables_initializer()
+    self.sess.run(init_op)
+
+    sample_files = glob('./data/{}/test/*.jpg'.format(self.dataset_name))
+
+    # sort testing input
+    n = [int(i) for i in map(lambda x: x.split('/')[-1].split('.jpg')[0], sample_files)]
+    sample_files = [x for (y, x) in sorted(zip(n, sample_files))]
+
+    # load testing input
+    print("====>> Loading testing images ...")
+    sample = [load_data(sample_file, is_test=True) for sample_file in sample_files]
+
+    if (self.is_grayscale):
+      sample_images = np.array(sample).astype(np.float32)[:, :, :, None]
+    else:
+      sample_images = np.array(sample).astype(np.float32)
+
+
+    sample_images = [sample_images[i:i+self.batch_size]
+                     for i in xrange(0, len(sample_images), self.batch_size)]
+    
+    sample_images = np.array(sample_images)
+    print 'Test image has shape: ', sample_images.shape, '\n'
+
+    start_time = time.time()    
+    if self.load_checkpoint(self.checkpoint_dir):
+      print("[*] Load SUCCESS\n")
+    else:
+      print("[!] Load failed...\n")
+
+    for i, sample_image in enumerate(sample_images):
+      idx = i + 1
+      print 'Testing the {}th image .....'.format(idx)
+      samples = self.sess.run(self.fake_B_sample, feed_dict={self.real_data: sample_image})
+
+      samples = inverse_transform(samples)
+      pht = sample_image[:, :, :, :self.input_c_dim]
+      skt = sample_image[:, :, :, self.input_c_dim:self.input_c_dim + self.output_c_dim]
+
+      # save test samples
+      self.save_samples(args.test_dir, idx, skt, samples, pht, concat=args.concatSamples)
+
+
           
-          # save loss curve
-          np.save(self.curve_dir + '/loss_d.npy', d_loss_set[:epoch + 1])
-          np.save(self.curve_dir + '/loss_g.npy', g_loss_set[:epoch + 1])
-
-          
-          
-

@@ -17,7 +17,7 @@ from model import *
 from dataLoader import *
 
 
-class img2img(object):
+class img2img_x(object):
   def __init__(self, sess, im_height=256, im_width=256, batch_size=1, sample_size=1, output_size=256,
                gf_dim=64, df_dim=64, L1_lambda=100, input_c_dim=3, output_c_dim=3, dataset_name='cufs_std_concat',
                checkpoint_dir=None, sample_dir=None):
@@ -263,7 +263,7 @@ class img2img(object):
 
     self.saver = tf.train.Saver()
 
-    print "\n[*] The model has been well initialized! \n"
+    print "\n[*] The model has been initialized SUCCESS! \n"
 
 
   '''
@@ -319,7 +319,7 @@ class img2img(object):
           _, summary_str = self.sess.run([g_optim, self.g_sum], feed_dict={ self.real_data: batch_images })
           self.writer.add_summary(summary_str, counter)
 
-          
+
         errD_fake = self.d_loss_fake.eval({self.real_data: batch_images})
         errD_real = self.d_loss_real.eval({self.real_data: batch_images})
         errG = self.g_loss.eval({self.real_data: batch_images})
@@ -330,6 +330,11 @@ class img2img(object):
         counter += 1
         print ('Epoch: [{}] [{:02d}/{}] || Time: {:.4f}s || D Loss: {:.8f} || G Loss: {:.8f}'.format(
           epoch, idx + 1, batch_idxs, time.time() - start_time, errD_fake+errD_real, errG))
+
+      # Early stopping if happens nan value
+      if np.isnan(train_d_loss) or np.isnan(train_g_loss):
+        print('Early stopping')
+        break
 
       # save single epoch result
       d_loss_set[epoch], g_loss_set[epoch] = train_d_loss/float(batch_idxs), train_g_loss/float(batch_idxs) 
@@ -435,7 +440,7 @@ class img2img(object):
     load checkpoint
   '''
   def load_checkpoint(self, checkpoint_dir):
-    print("====>> Reading checkpoint ...")
+    print("===>> Reading checkpoint .....")
 
     model_dir = "%s_%s_%s" % (self.dataset_name, self.batch_size, self.output_size)
     checkpoint_dir = os.path.join(checkpoint_dir, model_dir)
@@ -500,3 +505,5 @@ class img2img(object):
 
 
           
+          
+

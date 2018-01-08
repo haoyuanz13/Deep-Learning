@@ -113,14 +113,13 @@ def flatten_fully_connected(inputs, num_outputs, activation_fn=tf.nn.relu, norma
     return slim.fully_connected(inputs, num_outputs, activation_fn, normalizer_fn, normalizer_params, weights_initializer, weights_regularizer,
                   biases_initializer, biases_regularizer, reuse, variables_collections, outputs_collections, trainable, scope)
 
-# '''
-#   leaky relu
-# '''
-# def leak_relu(x, leak, scope=None):
-#   with tf.name_scope(scope, 'leak_relu', [x, leak]):
-#     y = tf.maximum(x, leak * x) if leak < 1 else tf.minimum(x, leak * x)
-#     return y
-
+'''
+  leaky relu
+'''
+def leak_relu(x, leak, scope=None):
+  with tf.name_scope(scope, 'leak_relu', [x, leak]):
+    y = tf.maximum(x, leak * x) if leak < 1 else tf.minimum(x, leak * x)
+    return y
 
 
 '''

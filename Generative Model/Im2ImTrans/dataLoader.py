@@ -9,6 +9,8 @@ from PIL import Image
 import scipy.misc
 import skimage.io as io 
 
+from utils import *
+
 ################
 # Define flags #
 ################
@@ -35,45 +37,39 @@ def normData(arr, twoSides=True):
   return arr
 
 
-'''
-  random crop back training data and data agumentation
-'''
-def randomCrop(img, flip=True):
-  img = scipy.misc.imresize(img, [FLAGS.load_height, FLAGS.load_width])
-
-  h1 = int(np.ceil(np.random.uniform(1e-2, FLAGS.load_height - FLAGS.fine_height)))
-  w1 = int(np.ceil(np.random.uniform(1e-2, FLAGS.load_width - FLAGS.fine_width)))
-
-  img = img[h1 : h1+FLAGS.fine_height, w1 : w1+FLAGS.fine_width]
-
-  if flip and np.random.random() > 0.5:
-    img = np.fliplr(img)
-
-  return img
-
 
 '''
-  image load: include random crop, norm and flip
+  load concat data
 '''
-def imload(path):
-  im_cur = scipy.misc.imread(path)
-  im_cur = randomCrop(im_cur, flip=True)
+def load_data(image_path, flip=True, is_test=False):
+  img_A, img_B = load_image(image_path)
+  img_A, img_B = preprocess_A_and_B(img_A, img_B, flip=flip, is_test=is_test)
 
-  im_cur = im_cur.astype(np.float32)
-  # normalize data
-  im_cur = im_cur / 127.5 - 1
+  img_A = img_A / 127.5 - 1.
+  img_B = img_B / 127.5 - 1.
 
-  im_cur_3c = np.zeros([1, FLAGS.fine_height, FLAGS.fine_width, 3]).astype(np.float32)
-  
-  if len(im_cur.shape) != 3:
-    im_cur_3c[0, :, :, 0] = im_cur
-    im_cur_3c[0, :, :, 1] = im_cur
-    im_cur_3c[0, :, :, 2] = im_cur
-  
+  img_AB = np.concatenate((img_A, img_B), axis=2)  # A is photo [0:3]; B is sketch [3:6]
+  # img_AB shape: (fine_size, fine_size, input_c_dim + output_c_dim)
+  return img_AB
+
+
+'''
+  separate images
+'''
+def load_image(image_path, is_grayscale=False):
+  if (is_grayscale):
+    input_img = scipy.misc.imread(image_path, flatten=True).astype(np.float)
   else:
-    im_cur_3c[0, :, :, :] = im_cur
+    input_img = scipy.misc.imread(image_path).astype(np.float)
+  
+  w = int(input_img.shape[1])
+  w2 = int(w / 2)
 
-  return im_cur_3c
+  img_A = input_img[:, 0 : w2]  # photos
+  img_B = input_img[:, w2 : w]  # sketches
+
+  return img_A, img_B
+
 
 
 '''

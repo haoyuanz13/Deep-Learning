@@ -10,16 +10,7 @@ import pdb
 from functools import partial
 from utils import *
 
-
-
-# leaky relu function
-# def lrelu(x, leak=0.2, name="lrelu"):
-#   with tf.variable_scope(name):
-#     f1 = 0.5 * (1 + leak)
-#     f2 = 0.5 * (1 - leak)
-#     return f1 * x + f2 * abs(x)
-
-
+# leaky relu with alfa=0.2
 def lrelu(x, leak=0.2, name="lrelu"):
   return tf.maximum(x, leak * x)
 
@@ -52,6 +43,19 @@ def conv2d(input_, output_dim, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="co
 
 
 
+# standard convolution layer with valid padding
+def conv2d_valid(input_, output_dim, k_h=2, k_w=2, d_h=1, d_w=1, stddev=0.02, name="conv2d"):
+  with tf.variable_scope(name):
+    w = tf.get_variable('w', [k_h, k_w, input_.get_shape()[-1], output_dim],
+              initializer=tf.truncated_normal_initializer(stddev=stddev))
+    conv = tf.nn.conv2d(input_, w, strides=[1, d_h, d_w, 1], padding='VALID')
+
+    biases = tf.get_variable('biases', [output_dim], initializer=tf.constant_initializer(0.0))
+    conv = tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape())
+
+    return conv
+
+
 # deconvolution
 def deconv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,
        name="deconv2d", with_w=False):
@@ -77,7 +81,6 @@ def deconv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,
       return deconv, w, biases
     else:
       return deconv
-
 
 
 '''
@@ -110,13 +113,13 @@ def flatten_fully_connected(inputs, num_outputs, activation_fn=tf.nn.relu, norma
     return slim.fully_connected(inputs, num_outputs, activation_fn, normalizer_fn, normalizer_params, weights_initializer, weights_regularizer,
                   biases_initializer, biases_regularizer, reuse, variables_collections, outputs_collections, trainable, scope)
 
-'''
-  leaky relu
-'''
-def leak_relu(x, leak, scope=None):
-  with tf.name_scope(scope, 'leak_relu', [x, leak]):
-    y = tf.maximum(x, leak * x) if leak < 1 else tf.minimum(x, leak * x)
-    return y
+# '''
+#   leaky relu
+# '''
+# def leak_relu(x, leak, scope=None):
+#   with tf.name_scope(scope, 'leak_relu', [x, leak]):
+#     y = tf.maximum(x, leak * x) if leak < 1 else tf.minimum(x, leak * x)
+#     return y
 
 
 

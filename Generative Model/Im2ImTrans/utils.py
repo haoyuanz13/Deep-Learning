@@ -1,17 +1,26 @@
-# from __future__ import division
+from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
 import numpy as np
+import math
+import json
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 import matplotlib.pyplot as plt
-# import cv2
+import random
+import pprint
+import scipy.misc
+from time import gmtime, strftime
 from PIL import Image
 import pdb
 import imageio, os
 
 from functools import partial
+
+
+pp = pprint.PrettyPrinter()
+get_stddev = lambda x, k_h, k_w: 1/math.sqrt(k_w*k_h*x.get_shape()[-1])
 
 
 '''
@@ -20,26 +29,57 @@ from functools import partial
 def addNoise(x):
   x = x * np.random.randint(2, size=x.shape)
   x += np.random.randint(2, size=x.shape)
-
   return x
 
 
-
+'''
+  merge images
+'''
 def merge(images, size):
-  h, w, c = images.shape[1], images.shape[2], images.shape[-1]
-  img = np.zeros((h * size[0], w * size[1]))
-
-  N = size[0] * size[1]
+  h, w = images.shape[1], images.shape[2]
+  img = np.zeros((h * size[0], w * size[1], 3))
   for idx, image in enumerate(images):
-    if idx >= N:
-      break
-
     i = idx % size[1]
-    j = idx / size[1]
+    j = idx // size[1]
+    
+    img[j * h : j * h + h, i * w : i * w + w, :] = image
 
-    img[j * h:j * h + h, i * w:i * w + w] = image
+  return img 
 
-  return img
+'''
+  recover images
+'''
+def inverse_transform(images):
+  return (images + 1.) / 2.
+
+
+'''
+  preprocess data to constraint certain size and data augmentuation
+'''
+def preprocess_A_and_B(img_A, img_B, load_size=286, fine_size=256, flip=True, is_test=False):
+  # test data
+  if is_test:
+    img_A = scipy.misc.imresize(img_A, [fine_size, fine_size])
+    img_B = scipy.misc.imresize(img_B, [fine_size, fine_size])
+  
+  # train data
+  else:
+    img_A = scipy.misc.imresize(img_A, [load_size, load_size])
+    img_B = scipy.misc.imresize(img_B, [load_size, load_size])
+
+    # random crop
+    h1 = int(np.ceil(np.random.uniform(1e-2, load_size-fine_size)))
+    w1 = int(np.ceil(np.random.uniform(1e-2, load_size-fine_size)))
+    img_A = img_A[h1:h1+fine_size, w1:w1+fine_size]
+    img_B = img_B[h1:h1+fine_size, w1:w1+fine_size]
+
+    # random crop
+    if flip and np.random.random() > 0.5:
+      img_A = np.fliplr(img_A)
+      img_B = np.fliplr(img_B)
+
+  return img_A, img_B
+
 
 
 '''
@@ -79,9 +119,10 @@ def processPlot_GANs():
   loss_d = np.load(path + '/loss_d.npy')
   loss_g = np.load(path + '/loss_g.npy')
 
-  total = loss_d.shape[0]
+  # total = loss_d.shape[0]
+  total = 450
 
-  processPlot_loss_GANs(path, total, loss_d, loss_g)
+  processPlot_loss_GANs(path, total, loss_d[:total], loss_g[:total])
 
 
 '''
@@ -100,3 +141,8 @@ def gifGenerate_GANs():
 
 if __name__ == "__main__":
   processPlot_GANs()
+
+
+
+
+

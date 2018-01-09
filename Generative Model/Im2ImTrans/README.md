@@ -24,6 +24,16 @@ Below figure shows the loss curve from generator and discriminator during the tr
   <img width="500" height="550" src="./im2im_res/cufs_std_concat_res/loss_curve.png", alt="loss curve"/>
 </div>
 
+Here we show more samples and test results.
+**Samples**
+<p >
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0552.png?raw=true" width="360" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0670.png?raw=true" width="360" height="120">
+</p>
+<p >
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0681.png?raw=true" width="360" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0921.png?raw=true" width="360" height="120">
+</p>
 
 ## Package Clarification
 ### Data

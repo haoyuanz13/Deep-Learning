@@ -93,7 +93,8 @@ Below figure shows the loss curve from generator and discriminator during the tr
 </div>
 
 
-**More Samples**
+**More Samples**    
+[Left: sketch; Middle: Generated samples; Right: real photo]
 <p >
 <align="left">
   <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0552.png?raw=true" width="390" height="130">

@@ -94,7 +94,7 @@ Below figure shows the loss curve from generator and discriminator during the tr
 
 
 **More Samples**    
-[Left: sketch; Middle: Generated samples; Right: real photo]
+**_Left_:** sketch **_Middle_:** generated sample **_Right_:** real photo
 <p >
 <align="left">
   <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0552.png?raw=true" width="390" height="130">
@@ -108,7 +108,8 @@ Below figure shows the loss curve from generator and discriminator during the tr
   <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0921.png?raw=true" width="390" height="130">
 </p>
 
-**Test Results**    
+**Test Results**       
+**_Left_:** sketch **_Middle_:** generated tests **_Right_:** real photo
 <p >
 <align="left">
   <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0001.png?raw=true" width="390" height="130">

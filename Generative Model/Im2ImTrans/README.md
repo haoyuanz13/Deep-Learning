@@ -21,7 +21,7 @@ Blow images are obtained from the dataset _cufs_std_concat_ using the mode _img2
 Below figure shows the loss curve from generator and discriminator during the training.
 
 <div align=center>
-  <img width="400" height="450" src="./im2im_res/cufs_std_concat_res/loss_curve.png", alt="loss curve"/>
+  <img width="600" height="660" src="./im2im_res/cufs_std_concat_res/loss_curve.png", alt="loss curve"/>
 </div>
 
 

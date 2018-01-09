@@ -26,12 +26,6 @@ Below figure shows the loss curve from generator and discriminator during the tr
 
 Here we show more samples and test results.     
 **Samples**
-<div aligh=left>
-  <img width="390" height="130" src="./im2im_res/cufs_std_concat_res/Samples/sample_0552.png?raw=true"/>
-<div align=right>
-  <img width="390" height="130" src="./im2im_res/cufs_std_concat_res/Samples/sample_0670.png?raw=true"/>
-</div>
-
 <p >
 <align="left">
   <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0552.png?raw=true" width="390" height="130">
@@ -43,6 +37,20 @@ Here we show more samples and test results.
   <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0681.png?raw=true" width="390" height="130">
 <align="right">
   <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0921.png?raw=true" width="390" height="130">
+</p>
+
+**Test**    
+<p >
+<align="left">
+  <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0001.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0003.png?raw=true" width="390" height="130">
+</p>
+<p >
+<align="left">
+  <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0040.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0048.png?raw=true" width="390" height="130">
 </p>
 
 ## Package Clarification

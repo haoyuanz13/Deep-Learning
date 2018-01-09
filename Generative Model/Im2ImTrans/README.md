@@ -26,9 +26,10 @@ Below figure shows the loss curve from generator and discriminator during the tr
 
 Here we show more samples and test results.     
 **Samples**
-<div align=left>
+<div >
+<aligh=left>
   <img width="390" height="130" src="./im2im_res/cufs_std_concat_res/Samples/sample_0552.png"/>
-<div align=right>
+<align=right>
   <img width="390" height="130" src="./im2im_res/cufs_std_concat_res/Samples/sample_0670.png"/>
 </div>
 

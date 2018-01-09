@@ -6,53 +6,6 @@ Tensorflow implementation of the [Image-to-Image Translation Using Conditional A
 ## Introduction
 In this work, I completed the overall network construction, and used two datasets, CUFS Students Faces and Facades, to train the model. Below sections show more details about the dataset, model architectures and package executions, also include the experimental results to verify the accuracy of my performance.
 
-## Experiments Results
-Blow images are obtained from the dataset _cufs_std_concat_ using the mode _img2img_x_. The **left most** one is the input sketch and **right most** one represents the real photo. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
-<p >
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0000_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0264_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0600_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0874_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0938_43.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_photo.png?raw=true" width="120" height="120">
-</p>
-
-Below figure shows the loss curve from generator and discriminator during the training.
-
-<div align=center>
-  <img width="500" height="550" src="./im2im_res/cufs_std_concat_res/loss_curve.png", alt="loss curve"/>
-</div>
-
-Here we show more samples and test results.     
-**Samples**
-<p >
-<align="left">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0552.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0670.png?raw=true" width="390" height="130">
-</p>
-<p >
-<align="left">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0681.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0921.png?raw=true" width="390" height="130">
-</p>
-
-**Test**    
-<p >
-<align="left">
-  <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0001.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0003.png?raw=true" width="390" height="130">
-</p>
-<p >
-<align="left">
-  <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0040.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0048.png?raw=true" width="390" height="130">
-</p>
-
 ## Package Clarification
 ### Data
 In this work, I use two types of datasets to train the model, each of them gave me the promising results.
@@ -120,3 +73,49 @@ python main_img2img.py --dataset_name=facades --phase=test
 ```bash
 python main_img2img.py --curveShow=True
 ```
+## Experiments Results
+Blow images are obtained from the dataset _cufs_std_concat_ using the mode _img2img_x_. The **left most** one is the input sketch and **right most** one represents the real photo. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+<p >
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0000_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0264_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0600_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0874_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0938_43.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_photo.png?raw=true" width="120" height="120">
+</p>
+
+Below figure shows the loss curve from generator and discriminator during the training.
+
+<div align=center>
+  <img width="500" height="550" src="./im2im_res/cufs_std_concat_res/loss_curve.png", alt="loss curve"/>
+</div>
+
+
+**More Samples**
+<p >
+<align="left">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0552.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0670.png?raw=true" width="390" height="130">
+</p>
+<p >
+<align="left">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0681.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0921.png?raw=true" width="390" height="130">
+</p>
+
+**Test Results**    
+<p >
+<align="left">
+  <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0001.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0003.png?raw=true" width="390" height="130">
+</p>
+<p >
+<align="left">
+  <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0040.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0048.png?raw=true" width="390" height="130">
+</p>

@@ -123,3 +123,36 @@ Below figure shows the loss curve from generator and discriminator during the tr
 <align="right">
   <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0048.png?raw=true" width="390" height="130">
 </p>
+
+### cufs_students dataset
+Blow images are obtained from the dataset _cufs_students_ using the mode _img2img_. Compared with the previous results, below generated faces are more blurred, and the model _img2img_ performs more fluctuations and unstable due to the implementation of batch normalization layers probably.
+
+**Samples**    
+**_Left_:** sketch **_Middle_:** generated sample **_Right_:** real photo
+<p >
+<align="left">
+  <img src = "./im2im_res/cufs_students_res/Samples/sample_1930.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/cufs_students_res/Samples/sample_1940.png?raw=true" width="390" height="130">
+</p>
+<p >
+<align="left">
+  <img src = "./im2im_res/cufs_students_res/Samples/sample_1950.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/cufs_students_res/Samples/sample_1960.png?raw=true" width="390" height="130">
+</p>
+
+**Test Results**       
+**_Left_:** sketch **_Middle_:** generated tests **_Right_:** real photo
+<p >
+<align="left">
+  <img src = "./im2im_res/cufs_students_res/Test/sample_0480.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/cufs_students_res/Test/sample_0510.png?raw=true" width="390" height="130">
+</p>
+<p >
+<align="left">
+  <img src = "./im2im_res/cufs_students_res/Test/sample_0540.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/cufs_students_res/Test/sample_0570.png?raw=true" width="390" height="130">
+</p>

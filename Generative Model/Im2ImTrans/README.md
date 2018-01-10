@@ -124,6 +124,7 @@ Below figure shows the loss curve from generator and discriminator during the tr
   <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0048.png?raw=true" width="390" height="130">
 </p>
 
+
 ### cufs_students dataset
 Blow images are obtained from the dataset _cufs_students_ using the mode _img2img_. Compared with the previous results, below generated faces are more blurred, and the model _img2img_ performs more fluctuations and unstable due to the implementation of batch normalization layers probably.
 
@@ -155,4 +156,43 @@ Blow images are obtained from the dataset _cufs_students_ using the mode _img2im
   <img src = "./im2im_res/cufs_students_res/Test/sample_0540.png?raw=true" width="390" height="130">
 <align="right">
   <img src = "./im2im_res/cufs_students_res/Test/sample_0570.png?raw=true" width="390" height="130">
+</p>
+
+
+### facades dataset
+Below figure shows the loss curve from generator and discriminator during the training.
+
+<div align=center>
+  <img width="500" height="550" src="./im2im_res/facades_res/loss_curve.png", alt="loss curve"/>
+</div>
+
+
+**More Samples**    
+**_Left_:** sketch **_Middle_:** generated sample **_Right_:** real photo
+<p >
+<align="left">
+  <img src = "./im2im_res/facades_res/Samples/sample_0986.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/facades_res/Samples/sample_0989.png?raw=true" width="390" height="130">
+</p>
+<p >
+<align="left">
+  <img src = "./im2im_res/facades_res/Samples/sample_0993.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/facades_res/Samples/sample_0995.png?raw=true" width="390" height="130">
+</p>
+
+**Test Results**       
+**_Left_:** sketch **_Middle_:** generated tests **_Right_:** real photo
+<p >
+<align="left">
+  <img src = "./im2im_res/facades_res/Test/sample_0001.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/facades_res/Test/sample_0020.png?raw=true" width="390" height="130">
+</p>
+<p >
+<align="left">
+  <img src = "./im2im_res/facades_res/Test/sample_0070.png?raw=true" width="390" height="130">
+<align="right">
+  <img src = "./im2im_res/facades_res/Test/sample_0100.png?raw=true" width="390" height="130">
 </p>

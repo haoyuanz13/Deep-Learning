@@ -160,8 +160,18 @@ Blow images are obtained from the dataset _cufs_students_ using the mode _img2im
 
 
 ### facades dataset
-Below figure shows the loss curve from generator and discriminator during the training.
+Blow images are obtained from the dataset _facades_ using the mode _img2img_x_. The **left most** one is the input sketch and **right most** one represents the real photo. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+<p >
+  <img src = "./im2im_res/facades_res/Samples_single/sample_sketch.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/facades_res/Samples_single/sample_0000.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/facades_res/Samples_single/sample_0020.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/facades_res/Samples_single/sample_0300.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/facades_res/Samples_single/sample_0679.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/facades_res/Samples_single/sample_0999.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/facades_res/Samples_single/sample_photo.png?raw=true" width="120" height="120">
+</p>
 
+Below figure shows the loss curve from generator and discriminator during the training.
 <div align=center>
   <img width="500" height="550" src="./im2im_res/facades_res/loss_curve.png", alt="loss curve"/>
 </div>

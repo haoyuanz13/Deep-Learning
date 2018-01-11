@@ -91,7 +91,7 @@ def VAE_main(dataset_train, dataset_test, cufs=True):
   f_z, comb_loss, ml_train, kl_train, var_vae = VAE(x_hat, x, cufs, reuse=False, is_train=True)
 
   # sample generation
-  f_z_samples, _, _, _, _ = VAE(x_hat, x, cufs, reuse=True, is_train=False)  
+  f_z_samples, _, _, _, _ = VAE(x_hat, x, cufs, reuse=True, is_train=True)  
   
   # VAE trainer 
   lr_vae = .001

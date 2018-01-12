@@ -153,7 +153,7 @@ Blow images are obtained from the dataset _cufs_students_ using the mode _img2im
 </p>
 <p >
 <align="left">
-  <img src = "./im2im_res/cufs_students_res/Test/sample_0540.png?raw=true" width="390" height="130">
+  <img src = "./im2im_res/cufs_students_res/Test/sample_1910.png?raw=true" width="390" height="130">
 <align="right">
   <img src = "./im2im_res/cufs_students_res/Test/sample_0570.png?raw=true" width="390" height="130">
 </p>

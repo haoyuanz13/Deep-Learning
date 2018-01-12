@@ -2,7 +2,7 @@ Image to Image translation with Conditional Adversarial Networks
 ========================================
 
 Tensorflow implementation of the [Image-to-Image Translation Using Conditional Adversarial Networks](https://arxiv.org/pdf/1611.07004.pdf), which learns a mapping(transformation) from the input sketches(e.g. labels, edges or aerial) to the output photos.    
-Please feel free to check the [Algorithm Notes](https://onenote.com/webapp/pages?token=614_NsU-o190Ojo4FyLIu0VCRLJ95GgroU116TKiSbeUCB3GlJqa2XfplyrOFK-k80EYRba0o5rhjr6z0R2aZeZqfC4jiswf0&id=636511293571190198) for better archietcure details review.
+Please feel free to check the [Algorithm Notes](https://onenote.com/webapp/pages?token=614_NsU-o190Ojo4FyLIu0VCRLJ95GgroU116TKiSbeUCB3GlJqa2XfplyrOFK-k80EYRba0o5rhjr6z0R2aZeZqfC4jiswf0&id=636511293571190198) for more architectural details review.
 
 ## Introduction
 In this work, I completed the overall network construction, and used two datasets, CUFS Students Faces and Facades, to train the model. Below sections show more details about the dataset, model architectures and package executions, also include the experimental results to verify the accuracy of my performance.

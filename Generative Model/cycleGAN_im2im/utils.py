@@ -152,7 +152,7 @@ def processPlot_loss_GANs(path, iteration, d_loss, g_loss):
   plot accuracy and loss curve wrt the iteration times
 '''
 def processPlot_GANs():
-  path = 'im2im_res/curves'
+  path = 'cycleGAN_res/curves'
   loss_d = np.load(path + '/loss_d.npy')
   loss_g = np.load(path + '/loss_g.npy')
 
@@ -165,7 +165,7 @@ def processPlot_GANs():
   generate gif
 '''
 def gifGenerate_GANs():
-  path = 'im2im_res/samples'
+  path = 'cycleGAN_res/samples'
   imgs = []
   for filename in sorted(os.listdir(path)):
     print (filename)

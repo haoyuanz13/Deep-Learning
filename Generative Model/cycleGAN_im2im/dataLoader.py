@@ -66,8 +66,8 @@ def load_data(image_path, flip=True, is_test=False):
   img_B = img_B / 127.5 - 1.
 
   # check image dimension
-  img_A = checkChannel(img_A)
-  img_B = checkChannel(img_B)
+  # img_A = checkChannel(img_A)
+  # img_B = checkChannel(img_B)
 
   img_AB = np.concatenate((img_A, img_B), axis=2)  # A is photo [0:3]; B is sketch [3:6]
   # img_AB shape: (fine_size, fine_size, input_c_dim + output_c_dim)
@@ -81,7 +81,7 @@ def load_image(image_path, is_grayscale=False):
   if (is_grayscale):
     input_img = scipy.misc.imread(image_path, flatten=True).astype(np.float)
   else:
-    input_img = scipy.misc.imread(image_path).astype(np.float)
+    input_img = scipy.misc.imread(image_path, mode='RGB').astype(np.float)
 
   return input_img
 

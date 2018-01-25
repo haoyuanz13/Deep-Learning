@@ -56,7 +56,7 @@ class img2img(object):
       self.generator = generator_resnet
     else:
       self.generator = generator_unet
-
+      
     if logLoss:
       self.obtainLoss = sce_criterion
     else:  # use least-square loss
@@ -197,7 +197,7 @@ class img2img(object):
     t_vars = tf.trainable_variables()
     self.d_vars = [var for var in t_vars if 'discriminator' in var.name]
     self.g_vars = [var for var in t_vars if 'generator' in var.name]
-    # for var in t_vars: print(var.name)
+    for var in t_vars: print(var.name)
     
     '''
       Build model saver
@@ -218,8 +218,12 @@ class img2img(object):
   '''
   def train(self, args):
     """Train img2img"""
-    d_optim = tf.train.AdamOptimizer(args.lr_modelD, beta1=args.beta1).minimize(self.d_loss, var_list=self.d_vars)
-    g_optim = tf.train.AdamOptimizer(args.lr_modelG, beta1=args.beta1).minimize(self.g_loss, var_list=self.g_vars)
+    # define learning rate
+    self.lr_modelD = tf.placeholder(tf.float32, None, name='learning_rate_D')
+    self.lr_modelG = tf.placeholder(tf.float32, None, name='learning_rate_G')
+
+    self.d_optim = tf.train.AdamOptimizer(self.lr_modelD, beta1=args.beta1).minimize(self.d_loss, var_list=self.d_vars)
+    self.g_optim = tf.train.AdamOptimizer(self.lr_modelG, beta1=args.beta1).minimize(self.g_loss, var_list=self.g_vars)
 
     init_op = tf.global_variables_initializer()
     self.sess.run(init_op)
@@ -239,6 +243,13 @@ class img2img(object):
     # training loop
     for epoch in xrange(2 if args.debug else int(args.max_iteration)):
       print '\n<===================== The {}th Epoch training is processing =====================>'.format(epoch)
+      # learning rate decay
+      lr_D = args.lr_modelD if epoch < args.epoch_step \
+                else args.lr_modelD*(args.max_iteration - epoch)/(args.max_iteration - args.epoch_step)
+      
+      lr_G = args.lr_modelG if epoch < args.epoch_step \
+                else args.lr_modelG*(args.max_iteration - epoch)/(args.max_iteration - args.epoch_step)
+
       # data are stored in A and B folder separately
       # dataA and dataB should be obatined randomly
       dataA = glob('./data/{}/trainA/*.jpg'.format(self.dataset_name))
@@ -254,6 +265,7 @@ class img2img(object):
 
       train_d_loss, train_g_loss = 0, 0
       start_time = time.time()
+
       for idx in xrange(0, batch_idxs):
         # cnoncatenate two files name
         batch_files_trainA = dataA[idx * self.batch_size : (idx + 1) * self.batch_size]
@@ -277,7 +289,8 @@ class img2img(object):
         errG = 0
         for t in xrange(0, args.n_critic_G):
           _, summary_str, fake_A_cur, fake_B_cur, errG_cur = \
-          self.sess.run([g_optim, self.g_sum, self.fake_A_fromB, self.fake_B_fromA, self.g_loss], feed_dict={ self.real_data: batch_images })
+          self.sess.run([self.g_optim, self.g_sum, self.fake_A_fromB, self.fake_B_fromA, self.g_loss], 
+                        feed_dict={self.real_data: batch_images, self.lr_modelG: lr_G})
 
           errG += errG_cur
           self.writer.add_summary(summary_str, counter)
@@ -289,8 +302,9 @@ class img2img(object):
         # train model D for n_critic_D times using the random picked fake A and B
         errD = 0
         for t in xrange(0, args.n_critic_D):
-          _, summary_str, errD_cur = self.sess.run([d_optim, self.d_sum, self.d_loss], feed_dict={ 
-            self.real_data: batch_images, self.fake_A_sample:fake_A_picked, self.fake_B_sample:fake_B_picked })
+          _, summary_str, errD_cur = self.sess.run([self.d_optim, self.d_sum, self.d_loss], feed_dict={ 
+            self.real_data: batch_images, self.fake_A_sample:fake_A_picked, 
+            self.fake_B_sample:fake_B_picked, self.lr_modelD: lr_D})
           
           errD += errD_cur
           self.writer.add_summary(summary_str, counter)
@@ -302,6 +316,7 @@ class img2img(object):
         counter += 1
         print ('Epoch: [{}] [{:02d}/{}] || Time: {:.4f}s || D Loss: {:.8f} || G Loss: {:.8f}'.format(
           epoch, idx + 1, batch_idxs, time.time() - start_time, errD / args.n_critic_D, errG / args.n_critic_G))
+
 
       # Early stopping if happens nan value
       if np.isnan(train_d_loss) or np.isnan(train_g_loss):
@@ -538,8 +553,3 @@ class img2img(object):
       # save test samples
       self.save_tests(args.test_dir, idx, real_A, test_B, AB=True, concat=args.concatSamples)
       self.save_tests(args.test_dir, idx, real_B, test_A, AB=False, concat=args.concatSamples)
-
-
-          
-          
-

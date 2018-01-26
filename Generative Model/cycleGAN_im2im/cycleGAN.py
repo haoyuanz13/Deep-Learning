@@ -238,10 +238,24 @@ class img2img(object):
       print("[!] Checkpoint Load failed...")
 
     d_loss_set,  g_loss_set = np.zeros([int(args.max_iteration)]), np.zeros([int(args.max_iteration)])
-    counter = 1  # count total training step [max_iteration x steps]
+
+    # fuse loss list if necessary
+    if args.epoch_offset != 0:
+      print("\n===>> Reading Loss data .....")
+      pre_d_loss_list = np.load(args.curve_dir + '/loss_d.npy')
+      pre_g_loss_list = np.load(args.curve_dir + '/loss_g.npy')
+
+      d_loss_set[:args.epoch_offset+1] = pre_d_loss_list[:args.epoch_offset+1]
+      g_loss_set[:args.epoch_offset+1] = pre_g_loss_list[:args.epoch_offset+1]
+
+      print("[*] Pre-trained Loss Data Load SUCCESS")
+
+    # set counter for summaries
+    counter = 0 if (args.epoch_offset == 0) else (args.epoch_offset + 1) * args.train_size  # count total training step [max_iteration x steps]
     
     # training loop
-    for epoch in xrange(2 if args.debug else int(args.max_iteration)):
+    epoch_start = 0 if (args.epoch_offset == 0) else int(args.epoch_offset + 1)
+    for epoch in xrange(int(epoch_start), int(args.max_iteration), 1):
       print '\n<===================== The {}th Epoch training is processing =====================>'.format(epoch)
       # learning rate decay
       lr_D = args.lr_modelD if epoch < args.epoch_step \
@@ -249,7 +263,7 @@ class img2img(object):
       
       lr_G = args.lr_modelG if epoch < args.epoch_step \
                 else args.lr_modelG*(args.max_iteration - epoch)/(args.max_iteration - args.epoch_step)
-
+                
       # data are stored in A and B folder separately
       # dataA and dataB should be obatined randomly
       dataA = glob('./data/{}/trainA/*.jpg'.format(self.dataset_name))
@@ -333,6 +347,7 @@ class img2img(object):
         # save loss curve
         np.save(args.curve_dir + '/loss_d.npy', d_loss_set[:epoch + 1])
         np.save(args.curve_dir + '/loss_g.npy', g_loss_set[:epoch + 1])
+
 
       # save model
       if epoch % args.interval_save == 0:
@@ -553,3 +568,8 @@ class img2img(object):
       # save test samples
       self.save_tests(args.test_dir, idx, real_A, test_B, AB=True, concat=args.concatSamples)
       self.save_tests(args.test_dir, idx, real_B, test_A, AB=False, concat=args.concatSamples)
+
+
+          
+          
+

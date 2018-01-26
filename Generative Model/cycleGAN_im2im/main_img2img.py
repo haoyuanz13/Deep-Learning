@@ -43,6 +43,7 @@ parser.add_argument('--interval_save', dest='interval_save', type=int, default=1
 parser.add_argument('--dim_first_modelG', dest='dim_first_modelG', type=int, default=64, help='# of gen filters in first conv layer')
 parser.add_argument('--dim_first_modelD', dest='dim_first_modelD', type=int, default=64, help='# of discri filters in first conv layer')
 parser.add_argument('--L1_loss_weight', dest='L1_loss_weight', type=float, default=10.0, help='weight on L1 term in objective')
+parser.add_argument('--epoch_offset', dest='epoch_offset', type=int, default=0, help='the offset of the start epoch')
 parser.add_argument('--epoch_step', dest='epoch_step', type=int, default=500, help='# of epoch to decay lr')
 parser.add_argument('--lr_modelG', dest='lr_modelG', type=float, default=0.0002, help='initial learning rate for adam [model G]')
 parser.add_argument('--lr_modelD', dest='lr_modelD', type=float, default=0.0002, help='initial learning rate for adam [model D]')
@@ -51,7 +52,6 @@ parser.add_argument('--n_critic_D', dest='n_critic_D', type=int, default=1, help
 parser.add_argument('--beta1', dest='beta1', type=float, default=0.5, help='momentum term of adam')
 parser.add_argument('--max_iteration', dest='max_iteration', type=int, default=1000, help='# of epoch')
 parser.add_argument('--addNoise', dest='addNoise', type=bool, default=False, help='if add noise to input data')
-parser.add_argument('--debug', dest='debug', type=bool, default=False, help='if debug the model instead of training')
 parser.add_argument('--curveShow', dest='curveShow', type=bool, default=False, help='if show loss curves')
 parser.add_argument('--phase', dest='phase', default='train', help='train, test')
 parser.add_argument('--randomSample', dest='randomSample', type=bool, default=False, help='if sample randomly')
@@ -107,7 +107,7 @@ def main(_):
   # tfconfig.gpu_options.allow_growth = True  
   # with tf.Session(config=tfconfig) as sess:
 
-  gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.899)    
+  gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.45)    
   with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
     print ("\n========== " + args.dataset_name.upper() + " dataset (Raw images) ==========")
     # args.max_iteration = 200      
@@ -136,6 +136,8 @@ def main(_):
 if __name__ == '__main__':
   # main()
   tf.app.run()
+
+
 
 
 

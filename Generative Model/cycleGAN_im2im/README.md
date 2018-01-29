@@ -77,13 +77,13 @@ Blow images are obtained from the dataset _cufs_students_. X represents the _ske
 The **left most** one is the input sketch, showing the training process of **_generator G_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
 
 <p >
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0000_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0264_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0600_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0874_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0938_43.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_photo.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_res/samples/real_A.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_res/samples/sample_ABA_fakeB0000.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_res/samples/sample_ABA_fakeB0002.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_res/samples/sample_ABA_fakeB0022.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_res/samples/sample_ABA_fakeB0260.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_res/samples/sample_ABA_fakeB0667.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_res/samples/sample_ABA_fakeB0999.png?raw=true" width="120" height="120">
 </p>
 
 The **left most** one is the input sketch, showing the training process of **_generator F_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).

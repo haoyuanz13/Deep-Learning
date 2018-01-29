@@ -1,11 +1,9 @@
-Image to image project using cycleGAN (Tensorflow implementation)
-
-
-Image to Image translation with Conditional Adversarial Networks
+Unpaired Image to Image translation with cycleGAN
 ========================================
 
-Tensorflow implementation of the [Image-to-Image Translation Using Conditional Adversarial Networks](https://arxiv.org/pdf/1611.07004.pdf), which learns a mapping(transformation) from the input sketches(e.g. labels, edges or aerial) to the output photos.    
-Please feel free to check the [Algorithm Notes](https://onenote.com/webapp/pages?token=614_NsU-o190Ojo4FyLIu0VCRLJ95GgroU116TKiSbeUCB3GlJqa2XfplyrOFK-k80EYRba0o5rhjr6z0R2aZeZqfC4jiswf0&id=636511293571190198) for more architectural details review.
+Tensorflow implementation of the [Unparied Image-to-Image Translation Using Cycle-Consistent Adversarial Networks](https://arxiv.org/pdf/1703.10593.pdf), which learns a characteristic mapping(transformation) between two data collections.
+
+Please feel free to check the [Algorithm Notes](https://onedrive.live.com/edit.aspx?resid=1AB6A4F12D4C608E!1553&cid=1ab6a4f12d4c608e&app=OneNote&wdorigin=ondchrd,ondcnotebooklist) for more architectural details review.
 
 ## Introduction
 In this work, I completed the overall network construction, and used two datasets, CUFS Students Faces and Facades, to train the model. Below sections show more details about the dataset, model architectures and package executions, also include the experimental results to verify the accuracy of my performance.

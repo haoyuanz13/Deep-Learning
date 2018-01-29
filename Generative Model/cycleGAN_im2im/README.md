@@ -130,7 +130,7 @@ Below figure shows the loss curve from generator and discriminator during the tr
 
 
 **Test Results**       
-**_Left_:** sketch(X) || **_Right_:** generated sample real faces(Y')
+**_Left_:** sketch(X) || **_Right_:** generated sample faces(Y')
 <p >
 <align="left">
   <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0001.png?raw=true" width="390" height="130">
@@ -144,7 +144,7 @@ Below figure shows the loss curve from generator and discriminator during the tr
   <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0048.png?raw=true" width="390" height="130">
 </p>
 
-**_Left_:** real faces(Y) || **_Right_:** generated sketches(X')
+**_Left_:** real faces(Y) || **_Right_:** generated sample sketches(X')
 <p >
 <align="left">
   <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0001.png?raw=true" width="390" height="130">

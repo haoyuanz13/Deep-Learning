@@ -10,17 +10,13 @@ Based on the project _Image-to-image using conditional GAN_, cycleGAN is able to
 
 ## Package Clarification
 ### Data
-In this work, I use two types of datasets to train the model, each of them gave me the promising results.
-1. [_CUFS_Students_](http://mmlab.ie.cuhk.edu.hk/archive/facesketch.html): includes the human face sketches and the real photos, total **88** training and **100** testing instances respectively.
+The dataset for cycleGAN is [here](http://people.eecs.berkeley.edu/~taesung_park/CycleGAN/datasets/). You can also check the .sh file _download_dataset.sh_ to download those data automatically via terminal. 
+- Download data via dataset name
+```bash
+bash ./download_dataset.sh monet2photo
+```
+**_Note:_** For downloaded dataset, please separate the test files into two parts, one for the test, called **testA (and testB)**, the other for the valication usage, called **valA (and valB)**.
 
-2. [_Facades_](http://cmp.felk.cvut.cz/~tylecr1/facade/): presents a dataset of facade images assembled at the Center for Machine Perception, which includes **606** rectified images of facades from various sources, which have been manually annotated. The facades are from different cities around the world and diverse architectural styles.    
-
-Here, I implemented some pre-processing operations on the CUFS dataset for better usage.    
-1. **cufs_students**: converted raw images into ndarray format into '.npy' files, selected 50 test images as validation data, including some data augementation operations like normalization, random flip and random crop. This dataset will be used by the model **img2img**.     
-
-2. **cufs_std_concat**: concatenated sketches and corresponding photos into single image, without any data augmentation. This dataset will be used by the model **img2img_x**.  
-
-3. **facades**: same data format as the **cufs_std_concat**. The model **img2img_x** includes some data augmentation operations when loading images during the training and testing.
 
 ### Models
 Here I created two models, _img2img_x_ and _img2img_. The overall structures are similar, but still exist some differences in the practical implementations.

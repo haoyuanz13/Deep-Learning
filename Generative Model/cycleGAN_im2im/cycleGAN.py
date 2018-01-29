@@ -377,7 +377,7 @@ class img2img(object):
       dataA = sorted(glob('./data/{}/valA/*.jpg'.format(self.dataset_name)))
       dataB = sorted(glob('./data/{}/valB/*.jpg'.format(self.dataset_name)))
 
-      data = (dataA[-1], dataB[-1])
+      data = (dataA[-1], dataB[-3])
       sample = load_data(data, flip=False, is_test=True)
       sample = np.expand_dims(sample, axis=0)  # shape [1, height, width, 6]
 
@@ -568,8 +568,3 @@ class img2img(object):
       # save test samples
       self.save_tests(args.test_dir, idx, real_A, test_B, AB=True, concat=args.concatSamples)
       self.save_tests(args.test_dir, idx, real_B, test_A, AB=False, concat=args.concatSamples)
-
-
-          
-          
-

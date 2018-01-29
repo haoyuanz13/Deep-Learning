@@ -89,13 +89,13 @@ The **left most** one is the input sketch, showing the training process of **_ge
 The **left most** one is the input sketch, showing the training process of **_generator F_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
 
 <p >
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0000_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0264_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0600_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0874_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0938_43.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_photo.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/real_A.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_ABA_fakeA0000.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_ABA_fakeA0001.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_ABA_fakeA0015.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_ABA_fakeA0154.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_ABA_fakeA0540.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_ABA_fakeA0999.png?raw=true" width="120" height="120">
 </p>
 
 **_Backward Cycle: Y -> X'=F(Y) -> Y'=G(X')_**                 

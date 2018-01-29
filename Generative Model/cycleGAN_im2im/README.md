@@ -19,19 +19,12 @@ bash ./download_dataset.sh monet2photo
 
 
 ### Models
-Here I created two models, _img2img_x_ and _img2img_. The overall structures are similar, but still exist some differences in the practical implementations.
+**_modules_**                    
+Contains discriminators and generators applied in the cycleGAN. In addition, we create two types of generator, one contains the U-net structure which is similar as the one in cGAN; the other one contains the Residual net block to update the network performance.       
+In both discriminator and generator, we use the _instance normalization_ to substitute the original _batch normalization_ refers to the paper network details.
 
-1. **_img2img_x_**          
-- suitable to load raw concatenated images (e.g. cufs_std_concat and facades) for training and testing.
-- uses standard conv, deconv and linear layers in Tensorflow.
-- includes all batch normalization layers as the class variables in order to achieve the pre-initialization.
-
-2. **_img2img_**   
-- suitable to load pre-stored '.npy' dataset (cufs_students) for training and testing.
-- uses slim and paritial structure in Tensorflow to stack functional layers together.
-- excludes all function layers in the generator and discriminator from the class variables.
-
-Both above two structures can provide reasonable results with similar running time and memory cost. However, the _model img2img_x outperforms than the model img2img in terms of the sample results and loss status during the training_. The main reason might be those pre-initialized bacth normlization layers.
+**_cycleGAN_**          
+Contains the main structure of the cycleGAN, including some helper functions like _cycle consistency_, _sample generation_ and _test_. Users can determine different dataset name, phase(e.g. train, test or curveShow), max training iteration, and so on.
 
 ### Other Files
 Besides two model classes, there are several essential files in the package.   

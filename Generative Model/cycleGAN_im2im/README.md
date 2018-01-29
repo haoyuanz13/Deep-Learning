@@ -10,8 +10,9 @@ Based on the project _Image-to-image using conditional GAN_, cycleGAN is able to
 
 ## Package Clarification
 ### Data
-The dataset for cycleGAN is [here](http://people.eecs.berkeley.edu/~taesung_park/CycleGAN/datasets/). You can also check the .sh file _download_dataset.sh_ to download those data automatically via terminal. 
-- Download data via dataset name
+The dataset for cycleGAN is [here](http://people.eecs.berkeley.edu/~taesung_park/CycleGAN/datasets/). You can also check the .sh file _download_dataset.sh_ to download those data automatically via terminal.       
+
+Download data via dataset name
 ```bash
 bash ./download_dataset.sh monet2photo
 ```
@@ -21,10 +22,12 @@ bash ./download_dataset.sh monet2photo
 ### Models
 **_modules_**                    
 Contains discriminators and generators applied in the cycleGAN. In addition, we create two types of generator, one contains the U-net structure which is similar as the one in cGAN; the other one contains the Residual net block to update the network performance.       
-In both discriminator and generator, we use the _instance normalization_ to substitute the original _batch normalization_ refers to the paper network details.
+
+In both discriminator and generator, we use the **_instance normalization_** to substitute the original **_batch normalization_** refers to the paper network details.
 
 **_cycleGAN_**          
-Contains the main structure of the cycleGAN, including some helper functions like _cycle consistency_, _sample generation_ and _test_. Users can determine different dataset name, phase(e.g. train, test or curveShow), max training iteration, and so on.
+Contains the main structure of the cycleGAN, including some helper functions like _cycle consistency_, _sample generation_ and _test_. Users can determine different dataset names, phases(e.g. train, test or curveShow), max training iteration, and so on.
+
 
 ### Other Files
 Besides two model classes, there are several essential files in the package.   
@@ -35,6 +38,7 @@ Besides two model classes, there are several essential files in the package.
 3. **_dataLoader_**: includes all data loader functions.
 
 4. **_utils_**: includes some helper functions like the image noise adding, image pre-processing and loss curve ploting.
+
 
 ## Code Execution
 ### Environment Prerequisites
@@ -48,22 +52,23 @@ In order to execute the package correctly, please make sure your system has been
 - Donwload this repo or using _git clone_
 
 - Train the model    
-The default phase is training, and it's better to specify the dataset name, such as 'cufs_students' or 'facades', the default is 'cufs_std_concat'. 
+The default phase is training, and it's better to specify the dataset name, such as 'cufs_students' or 'horse2zebra', the default is 'horse2zebra'. 
 
 ```bash
-python main_img2img.py --dataset_name=cufs_std_concat
+python main_img2img.py --dataset_name=monet2photo
 ```
   
 - Test the model    
 Remeber to specify the dataset name while testing.
 ```bash
-python main_img2img.py --dataset_name=facades --phase=test
+python main_img2img.py --dataset_name=monet2photo --phase=test
 ```
 
 - Show loss curve
 ```bash
 python main_img2img.py --curveShow=True
 ```
+
 ## Experiments Results
 ### cufs_std_concat dataset
 Blow images are obtained from the dataset _cufs_std_concat_ using the mode _img2img_x_. The **left most** one is the input sketch and **right most** one represents the real photo. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).

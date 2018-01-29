@@ -70,6 +70,86 @@ python main_img2img.py --curveShow=True
 ```
 
 ## Experiments Results
+### horse2zebra dataset
+Blow images are obtained from the dataset _horse2zebra_. X represents the _horse_ data collection and Y represents the _zebra_ data collection. The network is aimed to learn the _stripe_ characteristic.   
+
+**_Forward Cycle: X -> Y'=G(X) -> X'=F(Y')_**                 
+The **left most** one is a horse, showing the training process of **_generator G_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+
+<p >
+  <img src = "./res/horse2zebra_res/samples/real_A.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_ABA_fakeB0000.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_ABA_fakeB0028.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_ABA_fakeB0163.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_ABA_fakeB0386.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_ABA_fakeB0742.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_ABA_fakeB0999.png?raw=true" width="120" height="120">
+</p>
+
+The **left most** one is the a horse, showing the training process of **_generator F_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+
+<p >
+  <img src = "./res/horse2zebra_res/samples/real_A.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_ABA_fakeA0000.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_ABA_fakeA0010.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_ABA_fakeA0013.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_ABA_fakeA0455.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_ABA_fakeA0714.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_ABA_fakeA0999.png?raw=true" width="120" height="120">
+</p>
+
+**_Backward Cycle: Y -> X'=F(Y) -> Y'=G(X')_**                 
+The **left most** one is a zebra, showing the training process of **_generator F_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+
+<p >
+  <img src = "./res/horse2zebra_res/samples/real_B.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_BAB_fakeA0000.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_BAB_fakeA0010.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_BAB_fakeA0219.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_BAB_fakeA0576.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_BAB_fakeA0822.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_BAB_fakeA0999.png?raw=true" width="120" height="120">
+</p>
+
+The **left most** one is a zebra, showing the training process of **_generator G_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+
+<p >
+  <img src = "./res/horse2zebra_res/samples/real_B.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_BAB_fakeB0000.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_BAB_fakeB0046.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_BAB_fakeB0186.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_BAB_fakeB0501.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_BAB_fakeB0725.png?raw=true" width="120" height="120">
+  <img src = "./res/horse2zebra_res/samples/sample_BAB_fakeB0999.png?raw=true" width="120" height="120">
+</p>
+
+Below figure shows the loss curve from generator and discriminator during the training.
+<div align=center>
+  <img width="500" height="550" src="./res/horse2zebra_res/loss_curve.png", alt="loss curve"/>
+</div>
+
+
+**Test Results**       
+**_Left_:** horse(X) || **_Right_:** generated sample zebra(Y')
+<p >
+<align="left">
+  <img src = "./res/horse2zebra_res/test/test_AB0006.png?raw=true" width="260" height="130">
+<align="center">
+  <img src = "./res/horse2zebra_res/test/test_AB0008.png?raw=true" width="260" height="130">
+<align="right">
+  <img src = "./res/horse2zebra_res/test/test_AB0015.png?raw=true" width="260" height="130">
+</p>
+
+**_Left_:** zebra(Y) || **_Right_:** generated sample horse(X')
+<p >
+<align="left">
+  <img src = "./res/horse2zebra_res/test/test_BA0020.png?raw=true" width="260" height="130">
+<align="center">
+  <img src = "./res/horse2zebra_res/test/test_BA0017.png?raw=true" width="260" height="130">
+<align="right">
+  <img src = "./res/horse2zebra_res/test/test_BA0030.png?raw=true" width="260" height="130">
+</p>
+
 ### cufs_students dataset
 Blow images are obtained from the dataset _cufs_students_. X represents the _sketch faces_ data collection and Y represents the _real photo faces_ data collection.    
 

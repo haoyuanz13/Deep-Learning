@@ -74,8 +74,19 @@ python main_img2img.py --curveShow=True
 Blow images are obtained from the dataset _cufs_students_. X represents the _sketch faces_ data collection and Y represents the _real photo faces_ data collection.    
 
 - **_Forward Cycle: X -> Y' = G(X) -> X' = F(Y')_**          
-Below results show the training process of the forward cycle.
-- The **left most** one is the input sketch and **right most** one represents the real photo. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+The **left most** one is the input sketch and **right most** one represents the real photo, showing the **_X -> Y'_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+
+<p >
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0000_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0264_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0600_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0874_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0938_43.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_photo.png?raw=true" width="120" height="120">
+</p>
+
+The **left most** and **right most** both represents the input sketch, showing the **_X -> Y' -> X'_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
 
 <p >
   <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">
@@ -88,29 +99,13 @@ Below results show the training process of the forward cycle.
 </p>
 
 Below figure shows the loss curve from generator and discriminator during the training.
-
 <div align=center>
   <img width="500" height="550" src="./im2im_res/cufs_std_concat_res/loss_curve.png", alt="loss curve"/>
 </div>
 
 
-**More Samples**    
-**_Left_:** sketch **_Middle_:** generated sample **_Right_:** real photo
-<p >
-<align="left">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0552.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0670.png?raw=true" width="390" height="130">
-</p>
-<p >
-<align="left">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0681.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0921.png?raw=true" width="390" height="130">
-</p>
-
 **Test Results**       
-**_Left_:** sketch **_Middle_:** generated tests **_Right_:** real photo
+**_Left_:** sketch **_Right_:** generated sample real faces
 <p >
 <align="left">
   <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0001.png?raw=true" width="390" height="130">
@@ -122,87 +117,4 @@ Below figure shows the loss curve from generator and discriminator during the tr
   <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0040.png?raw=true" width="390" height="130">
 <align="right">
   <img src = "./im2im_res/cufs_std_concat_res/Test/sample_0048.png?raw=true" width="390" height="130">
-</p>
-
-
-### cufs_students dataset
-Blow images are obtained from the dataset _cufs_students_ using the mode _img2img_. Compared with the previous results, below generated faces are more blurred, and the model _img2img_ performs more fluctuations and unstable due to the implementation of batch normalization layers probably.
-
-**Samples**    
-**_Left_:** sketch **_Middle_:** generated sample **_Right_:** real photo
-<p >
-<align="left">
-  <img src = "./im2im_res/cufs_students_res/Samples/sample_1930.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/cufs_students_res/Samples/sample_1940.png?raw=true" width="390" height="130">
-</p>
-<p >
-<align="left">
-  <img src = "./im2im_res/cufs_students_res/Samples/sample_1950.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/cufs_students_res/Samples/sample_1960.png?raw=true" width="390" height="130">
-</p>
-
-**Test Results**       
-**_Left_:** sketch **_Middle_:** generated tests **_Right_:** real photo
-<p >
-<align="left">
-  <img src = "./im2im_res/cufs_students_res/Test/sample_0480.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/cufs_students_res/Test/sample_0510.png?raw=true" width="390" height="130">
-</p>
-<p >
-<align="left">
-  <img src = "./im2im_res/cufs_students_res/Test/sample_1910.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/cufs_students_res/Test/sample_0570.png?raw=true" width="390" height="130">
-</p>
-
-
-### facades dataset
-Blow images are obtained from the dataset _facades_ using the mode _img2img_x_. The **left most** one is the input sketch and **right most** one represents the real photo. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
-<p >
-  <img src = "./im2im_res/facades_res/Samples_single/sample_sketch.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/facades_res/Samples_single/sample_0000.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/facades_res/Samples_single/sample_0020.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/facades_res/Samples_single/sample_0300.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/facades_res/Samples_single/sample_0679.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/facades_res/Samples_single/sample_0999.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/facades_res/Samples_single/sample_photo.png?raw=true" width="120" height="120">
-</p>
-
-Below figure shows the loss curve from generator and discriminator during the training.
-<div align=center>
-  <img width="500" height="550" src="./im2im_res/facades_res/loss_curve.png", alt="loss curve"/>
-</div>
-
-
-**More Samples**    
-**_Left_:** sketch **_Middle_:** generated sample **_Right_:** real photo
-<p >
-<align="left">
-  <img src = "./im2im_res/facades_res/Samples/sample_0986.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/facades_res/Samples/sample_0989.png?raw=true" width="390" height="130">
-</p>
-<p >
-<align="left">
-  <img src = "./im2im_res/facades_res/Samples/sample_0993.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/facades_res/Samples/sample_0995.png?raw=true" width="390" height="130">
-</p>
-
-**Test Results**       
-**_Left_:** sketch **_Middle_:** generated tests **_Right_:** real photo
-<p >
-<align="left">
-  <img src = "./im2im_res/facades_res/Test/sample_0001.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/facades_res/Test/sample_0020.png?raw=true" width="390" height="130">
-</p>
-<p >
-<align="left">
-  <img src = "./im2im_res/facades_res/Test/sample_0070.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./im2im_res/facades_res/Test/sample_0100.png?raw=true" width="390" height="130">
 </p>

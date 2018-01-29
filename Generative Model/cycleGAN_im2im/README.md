@@ -70,7 +70,7 @@ python main_img2img.py --curveShow=True
 ```
 
 ## Experiments Results
-### horse2zebra dataset
+- ### horse2zebra dataset
 Blow images are obtained from the dataset _horse2zebra_. X represents the _horse_ data collection and Y represents the _zebra_ data collection. The network is aimed to learn the _stripe_ characteristic.   
 
 **_Forward Cycle: X -> Y'=G(X) -> X'=F(Y')_**                 
@@ -150,7 +150,7 @@ Below figure shows the loss curve from generator and discriminator during the tr
   <img src = "./res/horse2zebra_res/test/test_BA0030.png?raw=true" width="260" height="130">
 </p>
 
-### cufs_students dataset
+- ### cufs_students dataset
 Blow images are obtained from the dataset _cufs_students_. X represents the _sketch faces_ data collection and Y represents the _real photo faces_ data collection.    
 
 **_Forward Cycle: X -> Y'=G(X) -> X'=F(Y')_**                 

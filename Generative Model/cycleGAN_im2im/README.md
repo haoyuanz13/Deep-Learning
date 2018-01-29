@@ -133,27 +133,19 @@ Below figure shows the loss curve from generator and discriminator during the tr
 **_Left_:** sketch(X) || **_Right_:** generated sample faces(Y')
 <p >
 <align="left">
-  <img src = "./res/cufs_res/test/test_AB0001.png?raw=true" width="390" height="130">
+  <img src = "./res/cufs_res/test/test_AB0001.png?raw=true" width="260" height="130">
+<align="center">
+  <img src = "./res/cufs_res/test/test_AB0011.png?raw=true" width="260" height="130">
 <align="right">
-  <img src = "./res/cufs_res/test/test_AB0004.png?raw=true" width="390" height="130">
-</p>
-<p >
-<align="left">
-  <img src = "./res/cufs_res/test/test_AB0011.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./res/cufs_res/test/test_AB0035.png?raw=true" width="390" height="130">
+  <img src = "./res/cufs_res/test/test_AB0004.png?raw=true" width="260" height="130">
 </p>
 
 **_Left_:** real faces(Y) || **_Right_:** generated sample sketches(X')
 <p >
 <align="left">
-  <img src = "./res/cufs_res/test/test_BA0015.png?raw=true" width="390" height="130">
+  <img src = "./res/cufs_res/test/test_BA0015.png?raw=true" width="260" height="130">
+<align="center">
+  <img src = "./res/cufs_res/test/test_BA0017.png?raw=true" width="260" height="130">
 <align="right">
-  <img src = "./res/cufs_res/test/test_BA0017.png?raw=true" width="390" height="130">
-</p>
-<p >
-<align="left">
-  <img src = "./res/cufs_res/test/test_BA0031.png?raw=true" width="390" height="130">
-<align="right">
-  <img src = "./res/cufs_res/test/test_BA0051.png?raw=true" width="390" height="130">
+  <img src = "./res/cufs_res/test/test_BA0051.png?raw=true" width="260" height="130">
 </p>

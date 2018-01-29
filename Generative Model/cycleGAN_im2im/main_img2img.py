@@ -23,14 +23,14 @@ tf.set_random_seed(19)
 # Define args  #
 ################
 parser = argparse.ArgumentParser(description='')
-parser.add_argument('--dataset_name', dest='dataset_name', default='horse2zebra', help='name of the dataset [horse2zebra, cufs_students, facades]')
+parser.add_argument('--dataset_name', dest='dataset_name', default='horse2zebra', help='name of the dataset [horse2zebra, cufs_students, monet2photo]')
 parser.add_argument('--res_dir', dest='res_dir', default='./cycleGAN_res', help='all results are saved here')
 parser.add_argument('--checkpoint_dir', dest='checkpoint_dir', default='cycleGAN_res/checkpoint', help='models are saved here')
 parser.add_argument('--test_dir', dest='test_dir', default='cycleGAN_res/test', help='test sample are saved here')
 parser.add_argument('--sample_dir', dest='sample_dir', default='cycleGAN_res/samples', help='samples are saved here')
 parser.add_argument('--curve_dir', dest='curve_dir', default='cycleGAN_res/curves', help='loss curves are saved here')
 parser.add_argument('--log_dir', dest='log_dir', default='cycleGAN_res/logs', help='graphs are saved here')
-parser.add_argument('--train_size', dest='train_size', type=int, default=230, help='max # images used to train')
+parser.add_argument('--train_size', dest='train_size', type=int, default=250, help='max # images used to train')
 parser.add_argument('--batch_size', dest='batch_size', type=int, default=1, help='# images in batch')
 parser.add_argument('--sample_size', dest='sample_size', type=int, default=1, help='# images in sample')
 parser.add_argument('--image_height', dest='image_height', type=int, default=256, help='standard image height')
@@ -136,10 +136,3 @@ def main(_):
 if __name__ == '__main__':
   # main()
   tf.app.run()
-
-
-
-
-
-
-

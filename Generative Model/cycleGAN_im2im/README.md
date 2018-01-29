@@ -6,7 +6,7 @@ Tensorflow implementation of the [Unparied Image-to-Image Translation Using Cycl
 Please feel free to check the [Algorithm Notes](https://onenote.com/webapp/pages?token=4a-cUba9Pttcu9oKzpfF_J5mmj4MMyy3pyo9Lo3zNHgU8a4afgRcYtNDhzeZzkiB-oXXA13HFagcdxTixizlIb9Va7AhZvMQ0&id=636528503633738324) for more architectural details review.
 
 ## Introduction
-In this work, I completed the overall network construction, and used two datasets, CUFS Students Faces and Facades, to train the model. Below sections show more details about the dataset, model architectures and package executions, also include the experimental results to verify the accuracy of my performance.
+Based on the project _Image-to-image using conditional GAN_, cycleGAN is able to learn the underlying characteristics between two data collections without any paired image for training. Here I trained and tested the model using three datasets, **horse2zebra**, **monet2photo** and **cufs student faces**. Below sections show more details about the dataset, model architectures and package executions, also include the experimental results to verify the accuracy of my performance.
 
 ## Package Clarification
 ### Data

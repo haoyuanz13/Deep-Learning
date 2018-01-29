@@ -102,30 +102,30 @@ The **left most** one is the input sketch, showing the training process of **_ge
 The **left most** one is the input real photo, showing the training process of **_generator F_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
 
 <p >
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0000_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0264_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0600_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0874_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0938_43.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_photo.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/real_B.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_BAB_fakeA0000.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_BAB_fakeA0010.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_BAB_fakeA0032.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_BAB_fakeA0353.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_BAB_fakeA0717.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_BAB_fakeA0999.png?raw=true" width="120" height="120">
 </p>
 
 The **left most** one is the input real photo, showing the training process of **_generator G_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
 
 <p >
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0000_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0264_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0600_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0874_21.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0938_43.png?raw=true" width="120" height="120">
-  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_photo.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/real_B.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_BAB_fakeB0000.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_BAB_fakeB0010.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_BAB_fakeB0060.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_BAB_fakeB0339.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_BAB_fakeB0690.png?raw=true" width="120" height="120">
+  <img src = "./res/cufs_res/samples/sample_BAB_fakeB0999.png?raw=true" width="120" height="120">
 </p>
 
 Below figure shows the loss curve from generator and discriminator during the training.
 <div align=center>
-  <img width="500" height="550" src="./im2im_res/cufs_std_concat_res/loss_curve.png", alt="loss curve"/>
+  <img width="500" height="550" src="./res/cufs_res/loss_curve.png", alt="loss curve"/>
 </div>
 
 

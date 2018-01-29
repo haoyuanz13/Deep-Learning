@@ -73,8 +73,8 @@ python main_img2img.py --curveShow=True
 ### cufs_students dataset
 Blow images are obtained from the dataset _cufs_students_. X represents the _sketch faces_ data collection and Y represents the _real photo faces_ data collection.    
 
-- **_Forward Cycle: X -> Y' = G(X) -> X' = F(Y')_**          
-The **left most** one is the input sketch and **right most** one represents the real photo, showing the **_X -> Y'_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+**_Forward Cycle: X -> Y' = G(X) -> X' = F(Y')_**                 
+The **left most** one is the input sketch, showing the training process of **_generator G_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
 
 <p >
   <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">
@@ -86,7 +86,32 @@ The **left most** one is the input sketch and **right most** one represents the 
   <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_photo.png?raw=true" width="120" height="120">
 </p>
 
-The **left most** and **right most** both represents the input sketch, showing the **_X -> Y' -> X'_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+The **left most** one is the input sketch, showing the training process of **_generator F_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+
+<p >
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0000_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0264_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0600_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0874_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0938_43.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_photo.png?raw=true" width="120" height="120">
+</p>
+
+**_Backward Cycle: Y -> X' = F(Y) -> Y' = G(X')_**                 
+The **left most** one is the input real photo, showing the training process of **_generator F_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+
+<p >
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0000_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0264_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0600_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0874_21.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0938_43.png?raw=true" width="120" height="120">
+  <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_photo.png?raw=true" width="120" height="120">
+</p>
+
+The **left most** one is the input real photo, showing the training process of **_generator G_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
 
 <p >
   <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">

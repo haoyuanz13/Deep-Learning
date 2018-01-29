@@ -70,8 +70,13 @@ python main_img2img.py --curveShow=True
 ```
 
 ## Experiments Results
-### cufs_std_concat dataset
-Blow images are obtained from the dataset _cufs_std_concat_ using the mode _img2img_x_. The **left most** one is the input sketch and **right most** one represents the real photo. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+### cufs_students dataset
+Blow images are obtained from the dataset _cufs_students_. X represents the _sketch faces_ data collection and Y represents the _real photo faces_ data collection.    
+
+- **_Forward Cycle: X -> Y' = G(X) -> X' = F(Y')_**          
+Below results show the training process of the forward cycle.
+- The **left most** one is the input sketch and **right most** one represents the real photo. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+
 <p >
   <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_sketch.png?raw=true" width="120" height="120">
   <img src = "./im2im_res/cufs_std_concat_res/Samples/sample_0000_21.png?raw=true" width="120" height="120">

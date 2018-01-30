@@ -150,6 +150,86 @@ Below figure shows the loss curve from generator and discriminator during the tr
   <img src = "./res/horse2zebra_res/test/test_BA0030.png?raw=true" width="260" height="130">
 </p>
 
+- ### monet2photo dataset
+Blow images are obtained from the dataset _monet2photo_. X represents the _monet_ data collection and Y represents the _photo_ data collection.   
+
+**_Forward Cycle: X -> Y'=G(X) -> X'=F(Y')_**                 
+The **left most** one is a monet, showing the training process of **_generator G_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+
+<p >
+  <img src = "./res/monet2photo_res/samples/real_A.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_ABA_fakeB0000.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_ABA_fakeB0016.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_ABA_fakeB0182.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_ABA_fakeB0600.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_ABA_fakeB0847.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_ABA_fakeB0999.png?raw=true" width="120" height="120">
+</p>
+
+The **left most** one is the a monet, showing the training process of **_generator F_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+
+<p >
+  <img src = "./res/monet2photo_res/samples/real_A.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_ABA_fakeA0000.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_ABA_fakeA0001.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_ABA_fakeA0015.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_ABA_fakeA0344.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_ABA_fakeA0743.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_ABA_fakeA0999.png?raw=true" width="120" height="120">
+</p>
+
+**_Backward Cycle: Y -> X'=F(Y) -> Y'=G(X')_**                 
+The **left most** one is a real view photo, showing the training process of **_generator F_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+
+<p >
+  <img src = "./res/monet2photo_res/samples/real_B.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_BAB_fakeA0000.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_BAB_fakeA0010.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_BAB_fakeA0276.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_BAB_fakeA0563.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_BAB_fakeA0800.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_BAB_fakeA0999.png?raw=true" width="120" height="120">
+</p>
+
+The **left most** one is a real view photo, showing the training process of **_generator G_**. From left to right shows the generated samples along the training iteratons(iter idx: 10, 250, 600, 800, 1000).
+
+<p >
+  <img src = "./res/monet2photo_res/samples/real_B.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_BAB_fakeB0000.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_BAB_fakeB0010.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_BAB_fakeB0241.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_BAB_fakeB0443.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_BAB_fakeB0759.png?raw=true" width="120" height="120">
+  <img src = "./res/monet2photo_res/samples/sample_BAB_fakeB0999.png?raw=true" width="120" height="120">
+</p>
+
+Below figure shows the loss curve from generator and discriminator during the training.
+<div align=center>
+  <img width="500" height="550" src="./res/monet2photo_res/loss_curve.png", alt="loss curve"/>
+</div>
+
+
+**Test Results**       
+**_Left_:** monet(X) || **_Right_:** generated view photo(Y')
+<p >
+<align="left">
+  <img src = "./res/monet2photo_res/test/test_AB0001.png?raw=true" width="260" height="130">
+<align="center">
+  <img src = "./res/monet2photo_res/test/test_AB0006.png?raw=true" width="260" height="130">
+<align="right">
+  <img src = "./res/monet2photo_res/test/test_AB0076.png?raw=true" width="260" height="130">
+</p>
+
+**_Left_:** real view photo(Y) || **_Right_:** generated sample monet(X')
+<p >
+<align="left">
+  <img src = "./res/monet2photo_res/test/test_BA0002.png?raw=true" width="260" height="130">
+<align="center">
+  <img src = "./res/monet2photo_res/test/test_BA0021.png?raw=true" width="260" height="130">
+<align="right">
+  <img src = "./res/monet2photo_res/test/test_BA0027.png?raw=true" width="260" height="130">
+</p>
+
 - ### cufs_students dataset
 Blow images are obtained from the dataset _cufs_students_. X represents the _sketch faces_ data collection and Y represents the _real photo faces_ data collection.    
 

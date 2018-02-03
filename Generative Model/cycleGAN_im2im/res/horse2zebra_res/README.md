@@ -1,1 +1,1 @@
-Experiments results of CUFS Students dataset.
+Experiments results of horse2zebra Students dataset.

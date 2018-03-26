@@ -1,6 +1,6 @@
 Deep Learning and Vision
 -------------
-Deep network structure based Projects including source code, analyses and report, most of them contain PyTorch and Tensorflow two versions.    
+Deep network structure based projects, including source code, analyses and report. Most of them contain PyTorch and Tensorflow two versions.    
 
 Keep learning and uploading .....
 --------------------------------

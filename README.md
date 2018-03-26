@@ -1,8 +1,8 @@
-Deep Learning
+Deep Learning and Vision
 -------------
-Deep network structure Projects with source code, most of them contain PyTorch and Tensorflow two versions.    
+Deep network structure based Projects including source code, analyses and report, most of them contain PyTorch and Tensorflow two versions.    
 
-Keep uploading and learning.....
+Keep learning and uploading .....
 --------------------------------
 * Have included the deep network for playing with cifar10/100 data to achieve object classification.       
 * Uploaded simple FasterRCNN network. (Detect cifar10 with the cifar100 as background).      

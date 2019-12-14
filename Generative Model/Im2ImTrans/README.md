@@ -57,20 +57,20 @@ In order to execute the package correctly, please make sure your system has been
 ### Getting Start
 - Donwload this repo or using _git clone_
 
-- Train the model    
-The default phase is training, and it's better to specify the dataset name, such as 'cufs_students' or 'facades', the default is 'cufs_std_concat'. 
+- **Train the model**       
+The default phase is training, and it's better to specify the dataset name, such as `cufs_students` or `facades`, the default is `cufs_std_concat`. 
 
 ```bash
 python main_img2img.py --dataset_name=cufs_std_concat
 ```
   
-- Test the model    
+- **Test the model**    
 Remeber to specify the dataset name while testing.
 ```bash
 python main_img2img.py --dataset_name=facades --phase=test
 ```
 
-- Show loss curve
+- **Show loss curve**
 ```bash
 python main_img2img.py --curveShow=True
 ```
